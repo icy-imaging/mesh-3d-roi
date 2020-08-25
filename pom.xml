@@ -8,6 +8,8 @@
     <artifactId>icy-3d-mesh-roi</artifactId>
     <version>1.4.7</version>
 
+    <packaging>jar</packaging>
+
     <name>3D Mesh ROI</name>
     <description>
         SDK for 3D ROI creation and manipulation using polygonal (surface) and polyhedral (volume) meshes.
