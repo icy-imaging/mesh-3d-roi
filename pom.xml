@@ -52,17 +52,4 @@
             <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
         </repository>
     </repositories>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>icy-dev</id>
-            <name>icy-dev</name>
-            <url>https://icy-nexus-dev.pasteur.cloud/repository/icy-core/</url>
-        </snapshotRepository>
-        <repository>
-            <id>icy-prod</id>
-            <name>icy-prod</name>
-            <url>https://icy-nexus.pasteur.fr/repository/icy-core/</url>
-        </repository>
-    </distributionManagement>
 </project>
