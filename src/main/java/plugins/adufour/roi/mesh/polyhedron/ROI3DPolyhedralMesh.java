@@ -25,13 +25,15 @@ import vtk.vtkUnstructuredGridReader;
 import vtk.vtkXMLUnstructuredGridReader;
 
 /**
- * <h2>WARNING: Polyhedral meshes are still under development, do *not* use for production work!</h2>
- * <br/>
- * 3D <u>r</u>egion <u>o</u>f <u>i</u>nterest (ROI) defined as a polyhedral mesh (i.e. a connected
- * set of 3D polyhedrons defining the interior of the ROI).<br/>
- * <br/>
- * This data structure is the dual of {@link ROI3DPolygonalMesh polygon meshes} which only defines
- * the contour of the 3D ROI.
+ * <h2>WARNING: Polyhedral meshes are still under development, do *not* use for
+ * production work!</h2>
+ * <p>
+ * 3D <u>r</u>egion <u>o</u>f <u>i</u>nterest (ROI) defined as a polyhedral mesh
+ * (i.e. a connected set of 3D polyhedrons defining the interior of the ROI).
+ * <p>
+ * <p>
+ * This data structure is the dual of {@link ROI3DPolygonalMesh polygon meshes}
+ * which only defines the contour of the 3D ROI.
  * 
  * @author Alexandre Dufour
  */
@@ -81,7 +83,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
      * </ul>
      */
     @Override
-    public Polyhedron3D createCell(CellType type, int... vertexIndices)
+    public Polyhedron3D createCell(final CellType type, final int... vertexIndices)
     {
         if (type == CellType.POLYGON)
             throw new IllegalArgumentException("Cannot create a polygon for a polyhedral mesh");
@@ -101,7 +103,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
     }
 
     @Override
-    protected void updateVTKMesh(vtkPointSet vtkPointSet, Tuple3d pixelSize)
+    protected void updateVTKMesh(final vtkPointSet vtkPointSet, final Tuple3d pixelSize)
     {
         // we have vtkUnstructuredGrid here
         final vtkUnstructuredGrid vtkGrid = (vtkUnstructuredGrid) vtkPointSet;
@@ -173,13 +175,13 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
     // }
 
     @Override
-    public void loadFromVTK(File vtkFile, boolean useLegacyReader)
+    public void loadFromVTK(final File vtkFile, final boolean useLegacyReader)
     {
         final vtkUnstructuredGrid gridData;
 
         if (useLegacyReader)
         {
-            vtkUnstructuredGridReader legacyReader = new vtkUnstructuredGridReader();
+            final vtkUnstructuredGridReader legacyReader = new vtkUnstructuredGridReader();
             legacyReader.SetFileName(vtkFile.getPath());
             legacyReader.Update();
             legacyReader.GetOutput();
@@ -188,7 +190,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
         }
         else
         {
-            vtkXMLUnstructuredGridReader reader = new vtkXMLUnstructuredGridReader();
+            final vtkXMLUnstructuredGridReader reader = new vtkXMLUnstructuredGridReader();
             reader.SetFileName(vtkFile.getPath());
             reader.Update();
             gridData = reader.GetOutput();
@@ -199,7 +201,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
     }
 
     @Override
-    protected void addVtkCell(vtkCell cell)
+    protected void addVtkCell(final vtkCell cell)
     {
         final CellType cellType = CellType.GetCellType(cell.GetCellType());
         final vtkIdList ids = cell.GetPointIds();
@@ -260,7 +262,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
             // get mask from polydata (may fail if the polyData is too large)
             binaryImage = VtkUtil.getBinaryImageData(polyData, null);
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             // cleanup
             polyData.Delete();

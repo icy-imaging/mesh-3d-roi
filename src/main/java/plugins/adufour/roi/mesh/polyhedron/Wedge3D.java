@@ -4,9 +4,9 @@ import vtk.vtkCell3D;
 import vtk.vtkWedge;
 
 /**
- * Specialized implementation of a polyhedron in the form of a wedge (2 parallel polygons with equal
- * number of points). <br/>
- * <br/>
+ * Specialized implementation of a polyhedron in the form of a wedge (2 parallel
+ * polygons with equal number of points).
+ * <p>
  * Vertex ordering convention: (A1, ..., An, B1, ..., Bn)
  * <ul>
  * <li>Each half of the index buffer describes one face of the wedge</li>
@@ -18,7 +18,7 @@ import vtk.vtkWedge;
  */
 public class Wedge3D extends Polyhedron3D
 {
-    public Wedge3D(int... vertexIndices)
+    public Wedge3D(final int... vertexIndices)
     {
         super(vertexIndices);
 

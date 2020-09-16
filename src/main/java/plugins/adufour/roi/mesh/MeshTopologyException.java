@@ -4,11 +4,12 @@ import plugins.adufour.roi.mesh.polygon.ROI3DTriangularMesh;
 
 
 /**
- * Exception that occurs when the topology of a {@link ROI3DMesh} is inconsistent. A typical example
- * is when a {@link ROI3DTriangularMesh} is splitting as a result of a resampling operation, giving
- * rise to two new meshes.
+ * Exception that occurs when the topology of a {@link ROI3DMesh} is
+ * inconsistent. A typical example is when a {@link ROI3DTriangularMesh} is
+ * splitting as a result of a resampling operation, giving rise to two new
+ * meshes.
  * 
- * @see ROI3DTriangularMesh#reSampleToAverageDistance(double, double)
+ * @see ROI3DTriangularMesh#resample(double, double)
  * @author Alexandre Dufour
  */
 public class MeshTopologyException extends Exception
@@ -29,7 +30,7 @@ public class MeshTopologyException extends Exception
      *            the exception (typically when a mesh vanishes or splits as a result of a
      *            resampling operation)
      */
-    public <C extends Cell3D> MeshTopologyException(ROI3DMesh<C> contour, ROI3DMesh<C>[] children)
+    public <C extends Cell3D> MeshTopologyException(final ROI3DMesh<C> contour, final ROI3DMesh<C>[] children)
     {
         super("Topology break detected in contour " + contour.hashCode());
         this.source = contour;
