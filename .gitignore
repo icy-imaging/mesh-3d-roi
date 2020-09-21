@@ -5,3 +5,5 @@ target/
 *.iml
 .classpath
 .project
+export.jardesc
+*.jar
