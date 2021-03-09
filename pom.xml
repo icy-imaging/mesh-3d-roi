@@ -24,23 +24,23 @@
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-kernel</artifactId>
-            <version>${icy-kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>quickhull</artifactId>
-            <version>${quickhull.version}</version>
+            <version>1.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>vecmath</artifactId>
-            <version>${vecmath.version}</version>
+            <version>1.6.1</version>
         </dependency>
     </dependencies>
 
     <repositories>
         <repository>
             <id>icy</id>
+            <name>Icy's Nexus repository</name>
             <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
         </repository>
     </repositories>
