@@ -1834,25 +1834,25 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     @Override
-    public BooleanMask2D getBooleanMask2D(final int z, final boolean inclusive)
+    public BooleanMask2D getBooleanMask2D(final int z, final boolean inclusive) throws InterruptedException
     {
         return getROIMask().getBooleanMask2D(z, inclusive);
     }
 
     @Override
-    public BooleanMask3D getBooleanMask(final boolean inclusive)
+    public BooleanMask3D getBooleanMask(final boolean inclusive) throws InterruptedException
     {
         return getROIMask().getBooleanMask(inclusive);
     }
 
     @Override
-    public double getNumberOfContourPoints()
+    public double getNumberOfContourPoints() throws InterruptedException
     {
         return getROIMask().getNumberOfContourPoints();
     }
 
     @Override
-    public double getNumberOfPoints()
+    public double getNumberOfPoints() throws InterruptedException
     {
         return getROIMask().getNumberOfPoints();
     }
