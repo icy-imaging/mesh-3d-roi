@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
+		<artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <artifactId>parent-pom-plugin</artifactId>
-        <version>1.0.6</version>
-    </parent>
+        <version>2.0.0</version>
+	</parent>
 
     <artifactId>3d-mesh-roi</artifactId>
     <version>1.4.8</version>
@@ -19,22 +19,72 @@
     <description>
         SDK for 3D ROI creation and manipulation using polygonal (surface) and polyhedral (volume) meshes.
     </description>
+	
+	<profiles>
+        <profile>
+            <id>icy-plugin</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-kernel</artifactId>
+			<version>${icy-kernel.version}</version>
+        </dependency>
+		<dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-bioformats</artifactId>
+			<version>${icy-bioformats.version}</version>
+        </dependency>
+		<dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-vtk</artifactId>
+			<version>${icy-vtk.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>quickhull</artifactId>
-            <version>1.0.2</version>
+            <version>${quickhull.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>vecmath</artifactId>
-            <version>1.6.1</version>
+            <version>${vecmath.version}</version>
         </dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all</artifactId>
+			<version>${jogl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all-natives-linux-amd64</artifactId>
+			<version>${jogl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all-natives-linux-i586</artifactId>
+			<version>${jogl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all-natives-macosx-universal</artifactId>
+			<version>${jogl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all-natives-windows-amd64</artifactId>
+			<version>${jogl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all-natives-windows-i586</artifactId>
+			<version>${jogl.version}</version>
+		</dependency>
     </dependencies>
 
     <repositories>
