@@ -20,15 +20,6 @@
         SDK for 3D ROI creation and manipulation using polygonal (surface) and polyhedral (volume) meshes.
     </description>
 
-    <profiles>
-        <profile>
-            <id>icy-plugin</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
-    </profiles>
-
     <dependencies>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
