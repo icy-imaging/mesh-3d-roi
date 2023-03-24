@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-		<artifactId>pom-icy</artifactId>
+        <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
         <version>2.1.5</version>
-	</parent>
+    </parent>
 
     <artifactId>3d-mesh-roi</artifactId>
     <version>1.4.8</version>
@@ -19,8 +19,8 @@
     <description>
         SDK for 3D ROI creation and manipulation using polygonal (surface) and polyhedral (volume) meshes.
     </description>
-	
-	<profiles>
+
+    <profiles>
         <profile>
             <id>icy-plugin</id>
             <activation>
@@ -30,11 +30,11 @@
     </profiles>
 
     <dependencies>
-		<dependency>
+        <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-bioformats</artifactId>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>icy-vtk</artifactId>
         </dependency>
@@ -46,30 +46,30 @@
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>vecmath</artifactId>
         </dependency>
-		<dependency>
-			<groupId>org.jogamp.jogl</groupId>
-			<artifactId>jogl-all</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jogamp.jogl</groupId>
-			<artifactId>jogl-all-natives-linux-amd64</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jogamp.jogl</groupId>
-			<artifactId>jogl-all-natives-linux-i586</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jogamp.jogl</groupId>
-			<artifactId>jogl-all-natives-macosx-universal</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jogamp.jogl</groupId>
-			<artifactId>jogl-all-natives-windows-amd64</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jogamp.jogl</groupId>
-			<artifactId>jogl-all-natives-windows-i586</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-linux-amd64</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-linux-i586</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-macosx-universal</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-windows-amd64</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl-all-natives-windows-i586</artifactId>
+        </dependency>
     </dependencies>
 
     <repositories>
