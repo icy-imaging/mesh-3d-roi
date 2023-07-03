@@ -1,12 +1,22 @@
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package plugins.adufour.roi.mesh.polygon;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
 
 import icy.roi.BooleanMask3D;
 import icy.roi.ROI3D;
@@ -17,26 +27,18 @@ import plugins.adufour.roi.mesh.Cell3D;
 import plugins.adufour.roi.mesh.ROI3DMesh;
 import plugins.adufour.roi.mesh.Vertex3D;
 import plugins.kernel.roi.roi3d.ROI3DArea;
-import vtk.CellType;
-import vtk.vtkCell;
-import vtk.vtkCellArray;
-import vtk.vtkDataSetSurfaceFilter;
-import vtk.vtkDelaunay3D;
-import vtk.vtkIdList;
-import vtk.vtkImageData;
-import vtk.vtkMapper;
-import vtk.vtkPointSet;
-import vtk.vtkPoints;
-import vtk.vtkPolyData;
-import vtk.vtkPolyDataMapper;
-import vtk.vtkPolyDataPointSampler;
-import vtk.vtkPolyDataReader;
-import vtk.vtkUnstructuredGrid;
-import vtk.vtkXMLPolyDataReader;
+import vtk.*;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
+import javax.vecmath.Vector3d;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 
 /**
  * 3D <u>r</u>egion <u>o</u>f <u>i</u>nterest (ROI) defined as a polygonal mesh
- * (i.e. a closed set of 2D polygons in 3D space defining the contour of the
+ * (i.e., a closed set of 2D polygons in 3D space defining the contour of the
  * ROI).
  * <p>
  * <h2>Structure</h2> A polygonal mesh is defined by two data structures:
@@ -70,18 +72,15 @@ import vtk.vtkXMLPolyDataReader;
  * {@link #getBooleanMask(boolean) getBooleanMask()}, etc.)
  * <p>
  * <p>
- * 
- * @see <a href="http://en.wikipedia.org/wiki/Polygon_mesh">Polygon mesh
- *      (Wikipedia)</a>
+ *
  * @author Alexandre Dufour
+ * @see <a href="http://en.wikipedia.org/wiki/Polygon_mesh">Polygon mesh
+ * (Wikipedia)</a>
  */
-public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
-{
-    public class PolygonalMeshPainter extends MeshPainter
-    {
+public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D> {
+    public class PolygonalMeshPainter extends MeshPainter {
         @Override
-        protected vtkMapper createVTKMapper()
-        {
+        protected vtkMapper createVTKMapper() {
             return new vtkPolyDataMapper();
         }
     }
@@ -102,51 +101,43 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     /**
      * <h1>DO NOT USE! This constructor is for XML loading purposes only</h1>
      */
-    public ROI3DPolygonalMesh()
-    {
+    public ROI3DPolygonalMesh() {
         //
     }
 
     /**
      * Creates a 3D ROI from the specified {@link QuickHull3D} object
-     * 
-     * @param qhull
-     *        a convex envelope obtained using Icy's QuickHull library
+     *
+     * @param qhull a convex envelope obtained using Icy's QuickHull library
      */
-    public ROI3DPolygonalMesh(final QuickHull3D qhull)
-    {
+    public ROI3DPolygonalMesh(final QuickHull3D qhull) {
         super();
 
         loadFromQuickHull(qhull);
     }
 
-    public ROI3DPolygonalMesh(final vtkPolyData vtk)
-    {
+    public ROI3DPolygonalMesh(final vtkPolyData vtk) {
         super();
 
         loadFromVTK(vtk);
     }
 
     @Override
-    protected ROIPainter createPainter()
-    {
+    protected ROIPainter createPainter() {
         return new PolygonalMeshPainter();
     }
 
     @Override
-    protected vtkPointSet createVTKMesh()
-    {
+    protected vtkPointSet createVTKMesh() {
         return new vtkPolyData();
     }
 
-    protected vtkPolyData getVtkPolydata()
-    {
+    protected vtkPolyData getVtkPolydata() {
         return (vtkPolyData) getVTKMesh();
     }
 
     @Override
-    protected void updateVTKMesh(final vtkPointSet vtkPointSet, final Tuple3d pixelSize)
-    {
+    protected void updateVTKMesh(final vtkPointSet vtkPointSet, final Tuple3d pixelSize) {
         // we have vtkPolydata here
         final vtkPolyData vtkPolygons = (vtkPolyData) vtkPointSet;
 
@@ -158,13 +149,10 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
 
         if (vtkPanel != null)
             vtkPanel.lock();
-        try
-        {
-            synchronized (vtkInternalLock)
-            {
+        try {
+            synchronized (vtkInternalLock) {
                 // lock vtkPolygons as well
-                synchronized (vtkPolygons)
-                {
+                synchronized (vtkPolygons) {
                     final vtkPoints oldPoints = vtkPolygons.GetPoints();
                     // set the point data
                     vtkPolygons.SetPoints(newPoints);
@@ -182,8 +170,7 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
                 }
             }
         }
-        finally
-        {
+        finally {
             if (vtkPanel != null)
                 vtkPanel.unlock();
         }
@@ -192,34 +179,27 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     /**
      * Adds a new face to this mesh based on the specified vertex indices. Note that these indices
      * are not checked for existence in the vertex buffer.
-     * 
-     * @param vertexIndices
      */
-    public void addCell(final int... vertexIndices)
-    {
+    public void addCell(final int... vertexIndices) {
         addCell(createCell(vertexIndices));
     }
 
     /**
-	 * Adds a new face to this mesh. Note that the vertex indices of the
-	 * specified face are not checked for existence in the vertex buffer.
-	 * <p>
-	 * For optimal compatibility, it is recommended that the specified face is
-	 * obtained via the {@link #createCell(int...) createCompatibleCell} method
-	 * 
-	 * @param face
-	 *            the new face to add
-	 */
+     * Adds a new face to this mesh. Note that the vertex indices of the
+     * specified face are not checked for existence in the vertex buffer.
+     * <p>
+     * For optimal compatibility, it is recommended that the specified face is
+     * obtained via the {@link #createCell(int...) createCompatibleCell} method
+     *
+     * @param face the new face to add
+     */
     @Override
-	public void addCell(final Polygon3D face)
-    {
+    public void addCell(final Polygon3D face) {
         super.addCell(face);
 
-        synchronized (vertices)
-        {
+        synchronized (vertices) {
             // let vertices know about their new neighbors
-            for (int i = 0; i < face.size; i++)
-            {
+            for (int i = 0; i < face.size; i++) {
                 final int vi = face.vertexIndices[i];
                 final int vj = face.vertexIndices[(i + 1) % face.size];
 
@@ -230,8 +210,7 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     }
 
     @Override
-    protected Polygon3D createCell(final CellType type, final int... vertexIndices)
-    {
+    protected Polygon3D createCell(final CellType type, final int... vertexIndices) {
         if (type != CellType.POLYGON)
             throw new IllegalArgumentException("A polygonal mesh can only store cells of type POLYGON");
 
@@ -239,45 +218,37 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     }
 
     /**
-	 * Creates a new cell for this mesh (without adding it), using the specified
-	 * vertex indices.
-	 * <p>
-	 * By default, this method will return a {@link Polygon3D} object, but it
-	 * can be overridden to provide a custom implementation.
-	 * 
-	 * @param vertexIndices
-	 *            the indices of the vertices forming the mesh, in
-	 *            counter-clockwise order
-	 * @return the newly created face
-	 */
-    public Polygon3D createCell(final int... vertexIndices)
-    {
+     * Creates a new cell for this mesh (without adding it), using the specified
+     * vertex indices.
+     * <p>
+     * By default, this method will return a {@link Polygon3D} object, but it
+     * can be overridden to provide a custom implementation.
+     *
+     * @param vertexIndices the indices of the vertices forming the mesh, in
+     *                      counter-clockwise order
+     * @return the newly created face
+     */
+    public Polygon3D createCell(final int... vertexIndices) {
         return new Polygon3D(vertexIndices);
     }
 
     /**
      * Returns the minimum distance between all contour points and the specified point.
-     * 
-     * @param point
-     * @param closestPoint
-     *        an optional Point3d object that will be filled with the closest point
-     * @param scale
-     *        scale vector (pixel size) if we want to compute distance using real metrics in which case input point should be in metric unit too. Set
-     *        it to <code>null</code> if not needed.
+     *
+     * @param closestPoint an optional Point3d object that will be filled with the closest point
+     * @param scale        scale vector (pixel size) if we want to compute distance using real metrics in which case input point should be in metric unit too.
+     *                     Set it to <code>null</code> if not needed.
      */
-    public double getMinDistance(final Point3d point, final Point3d closestPoint, final Tuple3d scale)
-    {
+    public double getMinDistance(final Point3d point, final Point3d closestPoint, final Tuple3d scale) {
         final Point3d p = new Point3d();
         double dist = Double.MAX_VALUE;
 
-        for (final Vertex3D v : vertices)
-        {
+        for (final Vertex3D v : vertices) {
             if (v == null)
                 continue;
 
             final double d = vecMul(v.position, scale, p).distanceSquared(point);
-            if (d < dist)
-            {
+            if (d < dist) {
                 dist = d;
                 if (closestPoint != null)
                     closestPoint.set(p);
@@ -292,28 +263,22 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
 
     /**
      * Returns the maximum distance between all contour points and the specified point
-     * 
-     * @param point
-     *        the point to get max distance from
-     * @param farthestPoint
-     *        an optional Point3d object that will be filled with the farthest point
-     * @param scale
-     *        scale vector (pixel size) if we want to compute distance using real metrics in which case input point should be in metric unit too. Set
-     *        it to <code>null</code> if not needed.
+     *
+     * @param point         the point to get max distance from
+     * @param farthestPoint an optional Point3d object that will be filled with the farthest point
+     * @param scale         scale vector (pixel size) if we want to compute distance using real metrics in which case input point should be in metric unit too.
+     *                      Set it to <code>null</code> if not needed.
      */
-    public double getMaxDistance(final Point3d point, final Point3d farthestPoint, final Tuple3d scale)
-    {
+    public double getMaxDistance(final Point3d point, final Point3d farthestPoint, final Tuple3d scale) {
         final Point3d p = new Point3d();
         double dist = 0;
 
-        for (final Vertex3D v : vertices)
-        {
+        for (final Vertex3D v : vertices) {
             if (v == null)
                 continue;
 
             final double d = vecMul(v.position, scale, p).distanceSquared(point);
-            if (d > dist)
-            {
+            if (d > dist) {
                 dist = d;
                 if (farthestPoint != null)
                     farthestPoint.set(p);
@@ -339,33 +304,27 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     // }
 
     @Override
-    public ROI3DPolygonalMesh getCopy()
-    {
+    public ROI3DPolygonalMesh getCopy() {
         return (ROI3DPolygonalMesh) clone();
     }
 
     /**
-	 * Tests whether the given point is inside the contour, and if so returns
-	 * the penetration depth of this point. <br>
-	 * 
-	 * @param point
-	 *            a point to test
-	 * @param meshCenter
-	 *            the center of the mesh, if different from the mass center
-	 * @param scale
-	 *            scale vector (pixel size) if we want to compute penetration
-	 *            depth using real metrics in which case input point and
-	 *            meshCenter should be in metric unit too. Set it to
-	 *            <code>null</code> if not needed.
-	 * @return
-	 *         <ul>
-	 *         <li>if <code>p</code> is outside: <code>0</code>
-	 *         <li>if <code>p</code> is inside: the distance from <code>p</code>
-	 *         to the contour edge
-	 *         </ul>
-	 */
-    public double getPenetrationDepth(final Point3d point, final Point3d meshCenter, final Tuple3d scale)
-    {
+     * Tests whether the given point is inside the contour, and if so returns
+     * the penetration depth of this point. <br>
+     *
+     * @param point      a point to test
+     * @param meshCenter the center of the mesh, if different from the mass center
+     * @param scale      scale vector (pixel size) if we want to compute penetration
+     *                   depth using real metrics, in which case input point and
+     *                   meshCenter should be in metric unit too.
+     *                   Set it to <code>null</code> if not needed.
+     * @return <ul>
+     * <li>if <code>p</code> is outside: <code>0</code>
+     * <li>if <code>p</code> is inside: the distance from <code>p</code>
+     * to the contour edge
+     * </ul>
+     */
+    public double getPenetrationDepth(final Point3d point, final Point3d meshCenter, final Tuple3d scale) {
         final double epsilon = 1.0e-12;
 
         final Vector3d edge1 = new Vector3d();
@@ -396,13 +355,11 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
         // cut the face into a triangle fan
         // e.g. 5 points: (1,2,3); (1,3,4); (1,3,5)
 
-        for (final Polygon3D face : cells)
-        {
+        for (final Polygon3D face : cells) {
             // the first point never changes
             vecMul(vertices.get(face.vertexIndices[0]).position, scale, v1);
 
-            for (int i = 1; i < face.size - 1; i++)
-            {
+            for (int i = 1; i < face.size - 1; i++) {
                 vecMul(vertices.get(face.vertexIndices[i]).position, scale, v2);
                 vecMul(vertices.get(face.vertexIndices[i + 1]).position, scale, v3);
 
@@ -446,73 +403,46 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     }
 
     /**
-	 * Tests whether the given point is inside the contour, and if so returns
-	 * the penetration depth of this point. <br>
-	 * 
-	 * @param point
-	 *            a point to test
-	 * @param scale
-	 *            scale vector (pixel size) if we want to compute penetration
-	 *            depth using real metrics in which case input point should be
-	 *            in metric unit too. Set it to <code>null</code> if not needed.
-	 * @return
-	 *         <ul>
-	 *         <li>if <code>p</code> is outside: <code>0</code>
-	 *         <li>if <code>p</code> is inside: the distance from <code>p</code>
-	 *         to the contour edge
-	 *         </ul>
-	 */
-    public double getPenetrationDepth(final Point3d point, final Tuple3d scale)
-    {
+     * Tests whether the given point is inside the contour, and if so returns
+     * the penetration depth of this point. <br>
+     *
+     * @param point a point to test
+     * @param scale scale vector (pixel size) if we want to compute penetration
+     *              depth using real metrics in which case input point should be
+     *              in metric unit too.
+     *              Set it to <code>null</code> if not needed.
+     * @return <ul>
+     * <li>if <code>p</code> is outside: <code>0</code>
+     * <li>if <code>p</code> is inside: the distance from <code>p</code>
+     * to the contour edge
+     * </ul>
+     */
+    public double getPenetrationDepth(final Point3d point, final Tuple3d scale) {
         return getPenetrationDepth(point, getMassCenter(scale), scale);
     }
 
     /**
-	 * Tests whether the given point is inside the contour, and if so returns
-	 * the penetration depth of this point. <br>
-	 * 
-	 * @param point
-	 *            a point to test
-	 * @return
-	 *         <ul>
-	 *         <li>if <code>p</code> is outside: <code>0</code>
-	 *         <li>if <code>p</code> is inside: the distance from <code>p</code>
-	 *         to the contour edge
-	 *         </ul>
-	 */
-    public double getPenetrationDepth(final Point3d point)
-    {
+     * Tests whether the given point is inside the contour, and if so returns
+     * the penetration depth of this point. <br>
+     *
+     * @param point a point to test
+     * @return <ul>
+     * <li>if <code>p</code> is outside: <code>0</code>
+     * <li>if <code>p</code> is inside: the distance from <code>p</code>
+     * to the contour edge
+     * </ul>
+     */
+    public double getPenetrationDepth(final Point3d point) {
         return getPenetrationDepth(point, getMassCenter(null), null);
     }
 
-    /**
-     * @deprecated Use {@link #getPenetrationDepth(Point3d)} instead
-     */
-    @Deprecated
-	public double getDistanceToMesh(final Point3d point)
-    {
-        return getPenetrationDepth(point, getMassCenter(null), null);
-    }
-
-    /**
-     * @deprecated Use {@link #getPenetrationDepth(Point3d, Point3d, Tuple3d)} instead
-     */
-    @Deprecated
-	public double getDistanceToMesh(final Point3d point, final Point3d meshCenter)
-    {
-        return getPenetrationDepth(point, meshCenter, null);
-    }
-
-    public void resample(final double distance)
-    {
+    public void resample(final double distance) {
         final IcyVtkPanel vtkPanel = getMeshPainter().getVtkPanel();
 
         if (vtkPanel != null)
             vtkPanel.lock();
-        try
-        {
-            synchronized (vtkInternalLock)
-            {
+        try {
+            synchronized (vtkInternalLock) {
                 final vtkPolyDataPointSampler sampler = new vtkPolyDataPointSampler();
 
                 // use VTK object (should be up to date)
@@ -557,8 +487,7 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
                 sampler.Delete();
             }
         }
-        finally
-        {
+        finally {
             if (vtkPanel != null)
                 vtkPanel.unlock();
         }
@@ -1010,24 +939,21 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     // }
     //
     // }
+
     /**
      * Creates a 3D ROI from the specified {@link QuickHull3D} object
-     * 
-     * @param qhull
-     *        a convex envelope obtained using Icy's QuickHull library
+     *
+     * @param qhull a convex envelope obtained using Icy's QuickHull library
      */
-    public void loadFromQuickHull(final QuickHull3D qhull)
-    {
-        synchronized (vertices)
-        {
+    public void loadFromQuickHull(final QuickHull3D qhull) {
+        synchronized (vertices) {
             vertices.clear();
         }
 
         for (final Point3d vertex : qhull.getVertices())
             addVertex(createVertex(vertex), false, false);
 
-        synchronized (cells)
-        {
+        synchronized (cells) {
             cells.clear();
         }
 
@@ -1038,20 +964,17 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     }
 
     @Override
-    public void loadFromVTK(final File vtkFile, final boolean useLegacyReader)
-    {
+    public void loadFromVTK(final File vtkFile, final boolean useLegacyReader) {
         final vtkPolyData polyData;
 
-        if (useLegacyReader)
-        {
+        if (useLegacyReader) {
             final vtkPolyDataReader legacyReader = new vtkPolyDataReader();
             legacyReader.SetFileName(vtkFile.getPath());
             legacyReader.Update();
             polyData = legacyReader.GetOutput();
             legacyReader.Delete();
         }
-        else
-        {
+        else {
             final vtkXMLPolyDataReader reader = new vtkXMLPolyDataReader();
             reader.SetFileName(vtkFile.getPath());
             reader.Update();
@@ -1063,8 +986,7 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     }
 
     @Override
-    protected void addVtkCell(final vtkCell cell)
-    {
+    protected void addVtkCell(final vtkCell cell) {
         final vtkIdList ids = cell.GetPointIds();
         final int nId = ids.GetNumberOfIds();
         final int[] vertexIndices = new int[nId];
@@ -1112,15 +1034,13 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     // }
 
     /**
-	 * Saves this mesh as a OFF file
-	 * (<a href= "https://en.wikipedia.org/wiki/OFF_(file_format)" >Object File
-	 * Format</a>)
-	 * 
-	 * @param filePath
-	 *            the file to write to
-	 */
-    public void saveToOFF(final String filePath) throws FileNotFoundException
-    {
+     * Saves this mesh as a OFF file
+     * (<a href= "https://en.wikipedia.org/wiki/OFF_(file_format)" >Object File
+     * Format</a>)
+     *
+     * @param filePath the file to write to
+     */
+    public void saveToOFF(final String filePath) throws FileNotFoundException {
         optimizeVertexBuffer();
 
         final PrintStream ps = new PrintStream(filePath);
@@ -1138,25 +1058,22 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
             ps.println(vertex.position.x + " " + vertex.position.y + " " + vertex.position.z);
 
         // one line per face "numVertices v1 v2 ... vn"
-        for (final Cell3D cell : cells)
-        {
-            String line = String.valueOf(cell.size);
+        for (final Cell3D cell : cells) {
+            final StringBuilder line = new StringBuilder(String.valueOf(cell.size));
             for (final int vertexIndex : cell.vertexIndices)
-                line += " " + vertexIndex;
+                line.append(" ").append(vertexIndex);
             ps.println(line);
         }
 
         ps.close();
     }
 
-    public void updateNormals()
-    {
+    public void updateNormals() {
         final Vector3d v31 = new Vector3d();
         final Vector3d v12 = new Vector3d();
         final Vector3d v23 = new Vector3d();
 
-        for (final Polygon3D f : cells)
-        {
+        for (final Polygon3D f : cells) {
             // Accumulate face normals in each vertex
             // All face vertices are in the same plane
             // => use any 3 consecutive vertices
@@ -1203,10 +1120,8 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
         }
 
         // Normalize the accumulated normals
-        for (final Vertex3D v : vertices)
-        {
-            if (v != null)
-            {
+        for (final Vertex3D v : vertices) {
+            if (v != null) {
                 // important to test length as trying to normalize 0 length normal result in NaN !
                 if (v.normal.lengthSquared() > 0d)
                     v.normal.normalize();
@@ -1233,8 +1148,7 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
      * test is carried out).
      */
     @Override
-    public boolean contains(final double x, final double y, final double z)
-    {
+    public boolean contains(final double x, final double y, final double z) {
         // TODO: is it really used in real space anywhere as ROI logic imply image space ?? (Stef)
 
         // Point3d point = new Point3d(x, y, z);
@@ -1250,21 +1164,17 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D>
     }
 
     @Override
-    public BooleanMask3D buildMask()
-    {
+    public BooleanMask3D buildMask() {
         final vtkPolyData polyData = getVtkPolydata();
         final vtkImageData binaryImage;
 
         // prevent modification of polyData during processing
-        synchronized (polyData)
-        {
-            try
-            {
+        synchronized (polyData) {
+            try {
                 // get mask from polydata (may fail if the polyData is too large)
                 binaryImage = VtkUtil.getBinaryImageData(polyData, null);
             }
-            catch (final Exception e)
-            {
+            catch (final Exception e) {
                 // return empty mask 3D
                 return new BooleanMask3D();
             }

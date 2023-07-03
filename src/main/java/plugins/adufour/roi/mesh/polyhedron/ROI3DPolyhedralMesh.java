@@ -1,28 +1,32 @@
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package plugins.adufour.roi.mesh.polyhedron;
-
-import java.io.File;
-
-import javax.vecmath.Tuple3d;
 
 import icy.roi.BooleanMask3D;
 import icy.vtk.IcyVtkPanel;
 import icy.vtk.VtkUtil;
 import plugins.adufour.roi.mesh.ROI3DMesh;
 import plugins.adufour.roi.mesh.polygon.ROI3DPolygonalMesh;
-import vtk.CellType;
-import vtk.vtkCell;
-import vtk.vtkCellArray;
-import vtk.vtkDataSetMapper;
-import vtk.vtkDataSetSurfaceFilter;
-import vtk.vtkIdList;
-import vtk.vtkImageData;
-import vtk.vtkMapper;
-import vtk.vtkPointSet;
-import vtk.vtkPoints;
-import vtk.vtkPolyData;
-import vtk.vtkUnstructuredGrid;
-import vtk.vtkUnstructuredGridReader;
-import vtk.vtkXMLUnstructuredGridReader;
+import vtk.*;
+
+import javax.vecmath.Tuple3d;
+import java.io.File;
 
 /**
  * <h2>WARNING: Polyhedral meshes are still under development, do *not* use for
@@ -34,16 +38,13 @@ import vtk.vtkXMLUnstructuredGridReader;
  * <p>
  * This data structure is the dual of {@link ROI3DPolygonalMesh polygon meshes}
  * which only defines the contour of the 3D ROI.
- * 
+ *
  * @author Alexandre Dufour
  */
-public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
-{
-    public class PolyhedralMeshPainter extends MeshPainter
-    {
+public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D> {
+    public class PolyhedralMeshPainter extends MeshPainter {
         @Override
-        protected vtkMapper createVTKMapper()
-        {
+        protected vtkMapper createVTKMapper() {
             return new vtkDataSetMapper();
         }
     }
@@ -51,25 +52,21 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
     /**
      * <h1>DO NOT USE! This constructor is for XML loading purposes only</h1>
      */
-    public ROI3DPolyhedralMesh()
-    {
+    public ROI3DPolyhedralMesh() {
         // throw new IcyHandledException("3D Polyhedron ROI are under development");
     }
 
     @Override
-    protected ROIPainter createPainter()
-    {
+    protected ROIPainter createPainter() {
         return new PolyhedralMeshPainter();
     }
 
     @Override
-    protected vtkPointSet createVTKMesh()
-    {
+    protected vtkPointSet createVTKMesh() {
         return new vtkUnstructuredGrid();
     }
 
-    protected vtkUnstructuredGrid getVtkGrid()
-    {
+    protected vtkUnstructuredGrid getVtkGrid() {
         return (vtkUnstructuredGrid) getVTKMesh();
     }
 
@@ -83,13 +80,11 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
      * </ul>
      */
     @Override
-    public Polyhedron3D createCell(final CellType type, final int... vertexIndices)
-    {
+    public Polyhedron3D createCell(final CellType type, final int... vertexIndices) {
         if (type == CellType.POLYGON)
             throw new IllegalArgumentException("Cannot create a polygon for a polyhedral mesh");
 
-        switch (type)
-        {
+        switch (type) {
             case PYRAMID:
                 return new Pyramid3D(vertexIndices);
             case WEDGE:
@@ -103,8 +98,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
     }
 
     @Override
-    protected void updateVTKMesh(final vtkPointSet vtkPointSet, final Tuple3d pixelSize)
-    {
+    protected void updateVTKMesh(final vtkPointSet vtkPointSet, final Tuple3d pixelSize) {
         // we have vtkUnstructuredGrid here
         final vtkUnstructuredGrid vtkGrid = (vtkUnstructuredGrid) vtkPointSet;
 
@@ -117,13 +111,10 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
 
         if (vtkPanel != null)
             vtkPanel.lock();
-        try
-        {
-            synchronized (vtkInternalLock)
-            {
+        try {
+            synchronized (vtkInternalLock) {
                 // lock vtkGrid as well
-                synchronized (vtkGrid)
-                {
+                synchronized (vtkGrid) {
                     // set new points
                     final vtkPoints oldPoints = vtkGrid.GetPoints();
                     vtkGrid.SetPoints(newPoints);
@@ -146,8 +137,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
                 }
             }
         }
-        finally
-        {
+        finally {
             if (vtkPanel != null)
                 vtkPanel.unlock();
         }
@@ -175,12 +165,10 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
     // }
 
     @Override
-    public void loadFromVTK(final File vtkFile, final boolean useLegacyReader)
-    {
+    public void loadFromVTK(final File vtkFile, final boolean useLegacyReader) {
         final vtkUnstructuredGrid gridData;
 
-        if (useLegacyReader)
-        {
+        if (useLegacyReader) {
             final vtkUnstructuredGridReader legacyReader = new vtkUnstructuredGridReader();
             legacyReader.SetFileName(vtkFile.getPath());
             legacyReader.Update();
@@ -188,8 +176,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
             gridData = legacyReader.GetOutput();
             legacyReader.Delete();
         }
-        else
-        {
+        else {
             final vtkXMLUnstructuredGridReader reader = new vtkXMLUnstructuredGridReader();
             reader.SetFileName(vtkFile.getPath());
             reader.Update();
@@ -201,8 +188,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
     }
 
     @Override
-    protected void addVtkCell(final vtkCell cell)
-    {
+    protected void addVtkCell(final vtkCell cell) {
         final CellType cellType = CellType.GetCellType(cell.GetCellType());
         final vtkIdList ids = cell.GetPointIds();
         final int nId = ids.GetNumberOfIds();
@@ -240,8 +226,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
     // }
 
     @Override
-    public BooleanMask3D buildMask()
-    {
+    public BooleanMask3D buildMask() {
         final vtkPointSet mesh = getVTKMesh();
 
         // transform VTK mesh to polydata first
@@ -250,20 +235,17 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D>
         final vtkImageData binaryImage;
 
         // prevent modification of mesh during filtering
-        synchronized (mesh)
-        {
+        synchronized (mesh) {
             surfaceFilter.SetInputData(mesh);
             surfaceFilter.Update();
             polyData = surfaceFilter.GetOutput();
         }
 
-        try
-        {
+        try {
             // get mask from polydata (may fail if the polyData is too large)
             binaryImage = VtkUtil.getBinaryImageData(polyData, null);
         }
-        catch (final Exception e)
-        {
+        catch (final Exception e) {
             // cleanup
             polyData.Delete();
             surfaceFilter.Delete();

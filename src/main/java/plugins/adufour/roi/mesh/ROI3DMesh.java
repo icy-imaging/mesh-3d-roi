@@ -1,27 +1,22 @@
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package plugins.adufour.roi.mesh;
-
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import icy.canvas.IcyCanvas;
 import icy.painter.VtkPainter;
@@ -35,6 +30,9 @@ import icy.type.rectangle.Rectangle3D;
 import icy.util.XMLUtil;
 import icy.vtk.IcyVtkPanel;
 import icy.vtk.VtkUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import plugins.adufour.roi.mesh.polygon.Polygon3D;
 import plugins.adufour.roi.mesh.polygon.ROI3DPolygonalMesh;
 import plugins.adufour.roi.mesh.polyhedron.ROI3DPolyhedralMesh;
@@ -42,18 +40,19 @@ import plugins.kernel.canvas.VtkCanvas;
 import plugins.kernel.roi.roi2d.ROI2DArea;
 import plugins.kernel.roi.roi2d.ROI2DArea.ROI2DAreaPainter;
 import plugins.kernel.roi.roi3d.ROI3DArea;
-import vtk.CellType;
-import vtk.vtkActor;
-import vtk.vtkCell;
-import vtk.vtkCellArray;
-import vtk.vtkMapper;
-import vtk.vtkOutlineFilter;
-import vtk.vtkPointSet;
-import vtk.vtkPoints;
-import vtk.vtkPolyDataMapper;
-import vtk.vtkProp;
-import vtk.vtkUnsignedCharArray;
-import vtk.vtkXMLDataSetWriter;
+import vtk.*;
+
+import javax.vecmath.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Generic class defining a 3D region of interest using a discrete 3D geometry
@@ -62,10 +61,10 @@ import vtk.vtkXMLDataSetWriter;
  * <ul>
  * <li>Polygonal meshes (defining the region via its surface, see
  * {@link ROI3DPolygonalMesh})</li>
- * <li>Polyhederal meshes (defining the region by its interior, see
+ * <li>Polyhedral meshes (defining the region by its interior, see
  * {@link ROI3DPolyhedralMesh})</li>
  * </ul>
- * Be aware than ROI in Icy <b>should not</b> consider pixel size (except for 3D
+ * Be aware that ROI in Icy <b>should not</b> consider pixel size (except for 3D
  * rendering part) so it's important than 3D ROI are always expressed in
  * <b>voxel</b>.<br>
  * The VTK library provided with Icy already contains all the necessary tools to
@@ -81,16 +80,14 @@ import vtk.vtkXMLDataSetWriter;
  * <li>Eliminates most of the boiler-plate to simplify user code as much as
  * possible</li>
  * </ul>
- * 
+ *
  * @author Alexandre Dufour
  */
-public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
-{
+public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
     // single lock for VTK access
     protected final static Object vtkInternalLock = new Object();
 
-    public static Point3d vecMul(final Point3d source, final Tuple3d scale, final Point3d dest)
-    {
+    public static Point3d vecMul(final Point3d source, final Tuple3d scale, final Point3d dest) {
         final Point3d result = (dest == null) ? new Point3d() : dest;
 
         if (scale == null)
@@ -262,8 +259,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     // masks);
     // }
 
-    public abstract class MeshPainter extends ROIPainter implements VtkPainter
-    {
+    public abstract class MeshPainter extends ROIPainter implements VtkPainter, AutoCloseable {
         protected boolean showBoundingBoxIn2D;
 
         /**
@@ -290,13 +286,13 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         protected vtkUnsignedCharArray vtkColors;
 
         /**
-		 * <ul>
-		 * <li><code>true</code> mesh vertices are colored according to the
-		 * {@link #updateVTKRenderingColor()} method</li>
-		 * <li><code>false</code> mesh vertices are colored uniformly (at the
-		 * VTK actor level) using the ROI color</li>
-		 * </ul>
-		 */
+         * <ul>
+         * <li><code>true</code> mesh vertices are colored according to the
+         * {@link #updateVTKRenderingColor()} method</li>
+         * <li><code>false</code> mesh vertices are colored uniformly (at the
+         * VTK actor level) using the ROI color</li>
+         * </ul>
+         */
         protected boolean vtkCustomColoring;
 
         protected boolean needRebuild;
@@ -304,8 +300,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
         protected WeakReference<VtkCanvas> canvas3d;
 
-        public MeshPainter()
-        {
+        public MeshPainter() {
             super();
 
             pixelSize = new Point3d();
@@ -340,28 +335,26 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
             needRebuild = true;
             needColorUpdate = true;
-            canvas3d = new WeakReference<VtkCanvas>(null);
+            canvas3d = new WeakReference<>(null);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        protected void finalize() throws Throwable
-        {
-            super.finalize();
-
+        public void close() {
             // release allocated VTK resources
             if (mainActor != null)
                 mainActor.Delete();
             // release allocated VTK resources
             if (mapper != null)
                 mapper.Delete();
-            if (vtkRenderingMesh != null)
-            {
+            if (vtkRenderingMesh != null) {
                 vtkRenderingMesh.GetPointData().GetScalars().Delete();
                 vtkRenderingMesh.GetPointData().Delete();
                 vtkRenderingMesh.Delete();
             }
-            if (outlineActor != null)
-            {
+            if (outlineActor != null) {
                 if (outlineActor.GetMapper() != null)
                     outlineActor.GetMapper().Delete();
                 outlineActor.SetPropertyKeys(null);
@@ -371,10 +364,9 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
                 vtkOutlineFilter.Delete();
             if (vtkColors != null)
                 vtkColors.Delete();
-        };
+        }
 
-        public IcyVtkPanel getVtkPanel()
-        {
+        public IcyVtkPanel getVtkPanel() {
             final VtkCanvas canvas = canvas3d.get();
             // canvas not yet open or closed
             if (canvas == null)
@@ -389,17 +381,17 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         protected abstract vtkMapper createVTKMapper();
 
         /**
-		 * This method performs custom coloring of the mesh vertices. It is used
-		 * only if {@link #vtkCustomColoring} is set to <code>true</code>.
-		 * <p>
-		 * NOTE: the default implementation will color the mesh uniformly using
-		 * the ROI's color (i.e. it is equivalent to setting
-		 * {@link #vtkCustomColoring} to <code>false</code>) and therefore has
-		 * limited interest. However, this method can be overridden (and used as
-		 * a sample code) to provide custom vertex coloring along the mesh.
-		 */
-        protected void updateVTKRenderingColor()
-        {
+         * This method performs custom coloring of the mesh vertices.
+         * It is used only if {@link #vtkCustomColoring} is set to <code>true</code>.
+         * <p>
+         * NOTE: the default implementation will color the mesh uniformly using
+         * the ROI's color (i.e., it is equivalent to setting
+         * {@link #vtkCustomColoring} to <code>false</code>) and therefore has
+         * limited interest.
+         * However, this method can be overridden (and used as
+         * a sample code) to provide custom vertex coloring along the mesh.
+         */
+        protected void updateVTKRenderingColor() {
             // Color color = getColor();
             // int r = color.getRed(), g = color.getGreen(), b = color.getBlue();
             //
@@ -413,26 +405,21 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
             if (vtkPanel != null)
                 vtkPanel.lock();
-            try
-            {
-                synchronized (vtkInternalLock)
-                {
-                    synchronized (vtkRenderingMesh)
-                    {
+            try {
+                synchronized (vtkInternalLock) {
+                    synchronized (vtkRenderingMesh) {
                         vtkRenderingMesh.GetPointData().SetScalars(vtkColors);
                     }
                 }
             }
-            finally
-            {
+            finally {
                 if (vtkPanel != null)
                     vtkPanel.unlock();
             }
         }
 
         @Override
-        public void setColor(final Color color)
-        {
+        public void setColor(final Color color) {
             outlineActor.GetProperty().SetColor(color.getRed() / 255., color.getGreen() / 255., color.getBlue() / 255.);
             mainActor.GetProperty().SetColor(color.getRed() / 255., color.getGreen() / 255., color.getBlue() / 255.);
 
@@ -441,28 +428,23 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
             super.setColor(color);
         }
 
-        public void setColorPerVertex(final Color[] colors)
-        {
+        public void setColorPerVertex(final Color[] colors) {
             final IcyVtkPanel vtkPanel = getVtkPanel();
 
             if (vtkPanel != null)
                 vtkPanel.lock();
-            try
-            {
-                synchronized (vtkInternalLock)
-                {
+            try {
+                synchronized (vtkInternalLock) {
                     if (vtkColors.GetNumberOfTuples() != colors.length)
                         vtkColors.SetNumberOfTuples(colors.length);
 
-                    for (int i = 0; i < colors.length; i++)
-                    {
+                    for (int i = 0; i < colors.length; i++) {
                         final Color color = colors[i];
                         vtkColors.SetTuple3(i, color.getRed(), color.getGreen(), color.getBlue());
                     }
                 }
             }
-            finally
-            {
+            finally {
                 if (vtkPanel != null)
                     vtkPanel.unlock();
             }
@@ -471,30 +453,26 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
             needColorUpdate = true;
         }
 
-        public void setPixelSize(final Tuple3d value)
-        {
+        public void setPixelSize(final Tuple3d value) {
             pixelSize.set(value);
 
             needRebuild = true;
         }
 
         @Override
-        public vtkProp[] getProps()
-        {
-            return new vtkProp[] {mainActor, outlineActor};
+        public vtkProp[] getProps() {
+            return new vtkProp[]{mainActor, outlineActor};
         }
 
         @Override
-        public void mouseClick(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas)
-        {
+        public void mouseClick(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             if (e.isConsumed())
                 return;
             // not active here
             if (!isActiveFor(canvas))
                 return;
 
-            if (canvas instanceof VtkCanvas)
-            {
+            if (canvas instanceof VtkCanvas) {
                 final VtkCanvas vtk = (VtkCanvas) canvas;
                 // pick
                 final vtkProp prop = vtk.pickProp(e.getX(), e.getY());
@@ -507,28 +485,23 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         }
 
         @Override
-        public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas)
-        {
+        public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
             super.paint(g, sequence, canvas);
 
-            if (canvas instanceof VtkCanvas)
-            {
+            if (canvas instanceof VtkCanvas) {
                 // 3D canvas
                 final VtkCanvas cnv = (VtkCanvas) canvas;
 
                 // update reference if needed
                 if (canvas3d.get() != cnv)
-                    canvas3d = new WeakReference<VtkCanvas>(cnv);
+                    canvas3d = new WeakReference<>(cnv);
 
                 final IcyVtkPanel vtkPanel = cnv.getVtkPanel();
                 if (vtkPanel != null)
                     vtkPanel.lock();
-                try
-                {
-                    synchronized (vtkInternalLock)
-                    {
-                        if (!isActiveFor(canvas))
-                        {
+                try {
+                    synchronized (vtkInternalLock) {
+                        if (!isActiveFor(canvas)) {
                             // hide all
                             outlineActor.VisibilityOff();
                             mainActor.PickableOff();
@@ -553,8 +526,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
                             setPixelSize(newPixelSize);
 
                         // need to rebuild rendering mesh ?
-                        if (needRebuild)
-                        {
+                        if (needRebuild) {
                             // do it in the rendering thread (slow and laggy but easier than using canvas locking)
                             updateVTKMesh(vtkRenderingMesh, pixelSize);
                             // update outline
@@ -563,16 +535,14 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
                             needRebuild = false;
                             needColorUpdate = true;
                         }
-                        if (vtkCustomColoring && needColorUpdate)
-                        {
+                        if (vtkCustomColoring && needColorUpdate) {
                             // update color information if needed
                             updateVTKRenderingColor();
                             needColorUpdate = false;
                         }
                     }
                 }
-                finally
-                {
+                finally {
                     if (vtkPanel != null)
                         vtkPanel.unlock();
                 }
@@ -586,10 +556,8 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
                 final int posZ = canvas.getPositionZ();
                 final Rectangle3D bounds = getBounds3D();
 
-                if (posZ >= bounds.getMinZ() && posZ <= bounds.getMaxZ())
-                {
-                    if (showBoundingBoxIn2D)
-                    {
+                if (posZ >= bounds.getMinZ() && posZ <= bounds.getMaxZ()) {
+                    if (showBoundingBoxIn2D) {
                         setStroke(3.0);
                         g.setStroke(new BasicStroke((float) getAdjustedStroke(canvas)));
                         g.setColor(getColor());
@@ -597,12 +565,10 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
                         g.draw(new Rectangle2D.Double(bounds.getMinX(), bounds.getMinY(), bounds.getSizeX(),
                                 bounds.getSizeY()));
                     }
-                    else
-                    {
+                    else {
                         final ROI2DArea slice = getROIMask().getSlice(posZ);
 
-                        if (slice != null)
-                        {
+                        if (slice != null) {
                             final ROI2DAreaPainter maskPainter = slice.getOverlay();
 
                             maskPainter.setColor(getColor());
@@ -614,22 +580,18 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         }
 
         @Override
-        public void remove()
-        {
+        public void remove() {
             final IcyVtkPanel vtkPanel = getVtkPanel();
 
             if (vtkPanel != null)
                 vtkPanel.lock();
-            try
-            {
-                synchronized (vtkInternalLock)
-                {
+            try {
+                synchronized (vtkInternalLock) {
                     mainActor.VisibilityOff();
                     outlineActor.VisibilityOff();
                 }
             }
-            finally
-            {
+            finally {
                 if (vtkPanel != null)
                     vtkPanel.unlock();
             }
@@ -643,15 +605,15 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
     /**
      * The list of cells forming this mesh. Note that any change brought to this list should be
-     * followed by a call to {@link #roiChanged()} to update visualization
+     * followed by a call to {@link #roiChanged(boolean)} to update visualization
      */
     protected final List<C> cells;
 
     /**
      * The list of mesh vertices. Note that any change brought to this list should be followed by a
-     * call to {@link #roiChanged()} to update visualization
+     * call to {@link #roiChanged(boolean)} to update visualization
      */
-    protected List<Vertex3D> vertices;
+    protected final List<Vertex3D> vertices;
 
     /**
      * cached mask representation of this ROI (useful for 2D display and intensity measurements)
@@ -671,12 +633,11 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     protected boolean vtkMeshNeedUpdate;
     protected boolean propertiesNeedUpdate;
 
-    public ROI3DMesh()
-    {
+    public ROI3DMesh() {
         super();
 
-        cells = new ArrayList<C>();
-        vertices = new ArrayList<Vertex3D>();
+        cells = new ArrayList<>();
+        vertices = new ArrayList<>();
 
         // default mask
         mask = new BooleanMask3D();
@@ -691,16 +652,15 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     @SuppressWarnings("unchecked")
-    public MeshPainter getMeshPainter()
-    {
+    public MeshPainter getMeshPainter() {
         return (MeshPainter) painter;
     }
 
     /**
      * Creates the VTK structure that will contain the mesh data
-     * 
+     *
      * @return the VTK data holding the mesh contents
-     * @see ROI3DPolygonalMesh#createVTKMesh()
+     * @see ROI3DPolygonalMesh
      */
     protected abstract vtkPointSet createVTKMesh();
 
@@ -749,8 +709,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     /**
      * Get VTK points from internal vertices data
      */
-    protected vtkPoints getVtkPoints(final Tuple3d pixelSize)
-    {
+    protected vtkPoints getVtkPoints(final Tuple3d pixelSize) {
         // final vtkPoints result = new vtkPoints();
         final double sx = (pixelSize != null) ? pixelSize.x : 1d;
         final double sy = (pixelSize != null) ? pixelSize.y : 1d;
@@ -758,22 +717,18 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         final double[] points;
         final int nVerts;
 
-        synchronized (vertices)
-        {
+        synchronized (vertices) {
             nVerts = vertices.size();
             points = new double[nVerts * 3];
 
             int off = 0;
-            for (final Vertex3D v : vertices)
-            {
-                if (v == null)
-                {
+            for (final Vertex3D v : vertices) {
+                if (v == null) {
                     points[off++] = Double.NaN;
                     points[off++] = Double.NaN;
                     points[off++] = Double.NaN;
                 }
-                else
-                {
+                else {
                     points[off++] = v.position.x * sx;
                     points[off++] = v.position.y * sy;
                     points[off++] = v.position.z * sz;
@@ -806,13 +761,11 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     /**
      * Get VTK cells from internal cells data
      */
-    protected vtkCellArray getVtkCells()
-    {
+    protected vtkCellArray getVtkCells() {
         final int cellCount;
         final int[] indexBuffer;
 
-        synchronized (cells)
-        {
+        synchronized (cells) {
             cellCount = cells.size();
 
             // calculate the total number of indices in the index buffer
@@ -824,8 +777,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
             // build the new cells
             int vertexID = 0;
-            for (final C c : cells)
-            {
+            for (final C c : cells) {
                 indexBuffer[vertexID++] = c.size;
                 for (final int idx : c.vertexIndices)
                     indexBuffer[vertexID++] = idx;
@@ -843,10 +795,8 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     /**
      * Get the local internal VTK mesh structure
      */
-    protected vtkPointSet getVTKMesh()
-    {
-        if (vtkMeshNeedUpdate)
-        {
+    protected vtkPointSet getVTKMesh() {
+        if (vtkMeshNeedUpdate) {
             updateVTKMesh(vtkMesh, null);
             vtkMeshNeedUpdate = false;
         }
@@ -855,13 +805,11 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     @Override
-    public boolean saveToXML(final Node node)
-    {
+    public boolean saveToXML(final Node node) {
         if (!super.saveToXML(node))
             return false;
 
-        try
-        {
+        try {
             // XMLUtil.setAttributeDoubleValue((Element) node, "PixelSizeXY", pixelSize.x);
             // XMLUtil.setAttributeDoubleValue((Element) node, "PixelSizeZ", pixelSize.z);
 
@@ -875,8 +823,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
             final Node vtk = node.getOwnerDocument().importNode(doc.getDocumentElement(), true);
             node.appendChild(vtk);
         }
-        catch (final IOException e)
-        {
+        catch (final IOException e) {
             e.printStackTrace();
             return false;
         }
@@ -884,8 +831,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         return true;
     }
 
-    public boolean saveToVTK(final File vtkFile)
-    {
+    public boolean saveToVTK(final File vtkFile) {
         optimizeVertexBuffer();
 
         final vtkXMLDataSetWriter wr = new vtkXMLDataSetWriter();
@@ -898,13 +844,11 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     @Override
-    public boolean loadFromXML(final Node node)
-    {
+    public boolean loadFromXML(final Node node) {
         if (!super.loadFromXML(node))
             return false;
 
-        try
-        {
+        try {
             final Element e = (Element) node;
             // pixelSize.x = pixelSize.y = XMLUtil.getAttributeDoubleValue(e, "PixelSizeXY", 1.0);
             // pixelSize.z = XMLUtil.getAttributeDoubleValue(e, "PixelSizeZ", 1.0);
@@ -918,19 +862,16 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
             final boolean useLegacyReader = (vtkString != null);
 
-            if (useLegacyReader)
-            {
+            if (useLegacyReader) {
                 final FileWriter writer = new FileWriter(file);
                 writer.write(vtkString);
                 writer.flush();
                 writer.close();
             }
-            else
-            {
+            else {
                 // the format is probably XML
                 final Node vtkXML = XMLUtil.getChild(node, "VTKFile");
-                if (vtkXML == null)
-                {
+                if (vtkXML == null) {
                     return false;
                 }
 
@@ -941,8 +882,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
             loadFromVTK(file, useLegacyReader);
         }
-        catch (final IOException e)
-        {
+        catch (final IOException e) {
             e.printStackTrace();
             return false;
         }
@@ -955,12 +895,10 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
      * of the specified file and call the appropriate loader, which will result in slightly slower
      * performance. If the format is known in advance, use the {@link #loadFromVTK(File, boolean)}
      * method instead.
-     * 
-     * @param vtkFile
-     *        the VTK file to read from
+     *
+     * @param vtkFile the VTK file to read from
      */
-    public void loadFromVTK(final File vtkFile)
-    {
+    public void loadFromVTK(final File vtkFile) {
         // How to test: try to load as XML, and switch to legacy if it fails
         final Document vtkXML = XMLUtil.loadDocument(vtkFile);
         loadFromVTK(vtkFile, vtkXML == null);
@@ -968,51 +906,42 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
     /**
      * Loads the mesh data from the specified VTK file
-     * 
-     * @param vtkFile
-     *        the VTK file to read from
-     * @param useLegacyReader
-     *        <ul>
-     *        <li><code>true</code> if the file uses the old legacy (plain text or binary)
-     *        format</li>
-     *        <li><code>false</code> if the file uses the (recommended) XML format</li>
-     *        </ul>
+     *
+     * @param vtkFile         the VTK file to read from
+     * @param useLegacyReader <ul>
+     *                        <li><code>true</code> if the file uses the old legacy (plain text or binary)
+     *                        format</li>
+     *                        <li><code>false</code> if the file uses the (recommended) XML format</li>
+     *                        </ul>
      */
     public abstract void loadFromVTK(File vtkFile, boolean useLegacyReader);
 
     /**
-     * Add a cell data from the given VTK cell object
-     * 
-     * @param cell
-     *        the VTK cell to add
+     * Add cell data from the given VTK cell object
+     *
+     * @param cell the VTK cell to add
      */
     protected abstract void addVtkCell(vtkCell cell);
 
     /**
      * Loads the mesh data from the specified vtkPointSet object (internal method)
-     * 
-     * @param vtkPointSet
-     *        the VTK object to set mesh data from
+     *
+     * @param vtkPointSet the VTK object to set mesh data from
      */
-    protected void loadFromVTK(final vtkPointSet vtkPointSet)
-    {
-        synchronized (vertices)
-        {
+    protected void loadFromVTK(final vtkPointSet vtkPointSet) {
+        synchronized (vertices) {
             vertices.clear();
         }
-        synchronized (cells)
-        {
+        synchronized (cells) {
             cells.clear();
         }
 
         final vtkPoints vtkPoints = vtkPointSet.GetPoints();
 
-        if (vtkPoints != null)
-        {
+        if (vtkPoints != null) {
             // load points (generically)
             final int nPoints = vtkPoints.GetNumberOfPoints();
-            for (int i = 0; i < nPoints; i++)
-            {
+            for (int i = 0; i < nPoints; i++) {
                 final double[] xyz = vtkPoints.GetPoint(i);
                 final Point3d position = new Point3d(xyz);
 
@@ -1029,10 +958,8 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     @Override
-    public void roiChanged(final boolean contentChanged)
-    {
-        if (contentChanged)
-        {
+    public void roiChanged(final boolean contentChanged) {
+        if (contentChanged) {
             // lazy update
             maskNeedUpdate = true;
             vtkMeshNeedUpdate = true;
@@ -1048,12 +975,10 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
      */
     @SuppressWarnings("unchecked")
     @Override
-    public ROI3DMesh<C> clone()
-    {
-        try
-        {
+    public ROI3DMesh<C> clone() {
+        try {
             // clone the mesh
-            final ROI3DMesh<C> clone = getClass().newInstance();
+            final ROI3DMesh<C> clone = getClass().getDeclaredConstructor().newInstance();
 
             clone.setVertexData(vertices, true);
             clone.setCellData(cells, true);
@@ -1066,76 +991,64 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
             return clone;
         }
-        catch (final Exception e)
-        {
+        catch (final Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
 
     /**
-	 * Clears and replaces the vertices of this mesh by the specified vertex
-	 * array. This is a low-level method for bulk assignment, therefore the ROI
-	 * is not notified of any change to its internal data (a call to
-	 * {@link #roiChanged()} is required)
-	 * <p>
-	 * <p>
-	 * <b>Note:</b> the vertices in the provided list are not copied, therefore
-	 * any change to their contents after calling this method will still affect
-	 * this mesh
-	 * 
-	 * @param newVertices
-	 *            the new vertices of this mesh
-	 */
-    protected void setVertexData(final Collection<Vertex3D> newVertices, final boolean cloneVertex)
-    {
-        synchronized (vertices)
-        {
+     * Clears and replaces the vertices of this mesh by the specified vertex
+     * array.
+     * This is a low-level method for bulk assignment, therefore, the ROI
+     * is not notified of any change to its internal data (a call to
+     * {@link #roiChanged(boolean)} is required)
+     * <p>
+     * <p>
+     * <b>Note:</b> the vertices in the provided list are not copied, therefore,
+     * any change to their contents after calling this method will still affect
+     * this mesh
+     *
+     * @param newVertices the new vertices of this mesh
+     */
+    protected void setVertexData(final Collection<Vertex3D> newVertices, final boolean cloneVertex) {
+        synchronized (vertices) {
             vertices.clear();
 
-            if (cloneVertex)
-            {
+            if (cloneVertex) {
                 for (final Vertex3D v : newVertices)
                     vertices.add((v != null) ? v.clone() : null);
             }
-            else
-            {
-                for (final Vertex3D v : newVertices)
-                    vertices.add(v);
+            else {
+                vertices.addAll(newVertices);
             }
         }
     }
 
     /**
-	 * Clears and replaces the cells of this mesh by the specified cell array.
-	 * This is a low-level method for bulk assignment, therefore the ROI is not
-	 * notified of any change to its internal data (a call to
-	 * {@link #roiChanged()} is required)
-	 * <p>
-	 * <p>
-	 * <b>Note:</b> the cells in the provided list are not copied, therefore any
-	 * change to their contents after calling this method will still affect this
-	 * mesh
-	 * 
-	 * @param newCells
-	 *            the new cells of this mesh
-	 */
+     * Clears and replaces the cells of this mesh by the specified cell array.
+     * This is a low-level method for bulk assignment, therefore, the ROI is not
+     * notified of any change to its internal data (a call to
+     * {@link #roiChanged(boolean)} is required)
+     * <p>
+     * <p>
+     * <b>Note:</b> the cells in the provided list are not copied, therefore, any
+     * change to their contents after calling this method will still affect this
+     * mesh
+     *
+     * @param newCells the new cells of this mesh
+     */
     @SuppressWarnings("unchecked")
-    protected void setCellData(final Collection<C> newCells, final boolean cloneCell)
-    {
-        synchronized (cells)
-        {
+    protected void setCellData(final Collection<C> newCells, final boolean cloneCell) {
+        synchronized (cells) {
             cells.clear();
 
-            if (cloneCell)
-            {
+            if (cloneCell) {
                 for (final C c : newCells)
                     cells.add((c != null) ? (C) c.clone() : null);
             }
-            else
-            {
-                for (final C c : newCells)
-                    cells.add(c);
+            else {
+                cells.addAll(newCells);
             }
         }
     }
@@ -1144,124 +1057,106 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
      * Creates and adds a new face to this mesh using the specified vertex indices within the mesh's
      * existing vertex buffer.
      */
-    public void addCell(final C cell)
-    {
-        synchronized (cells)
-        {
+    public void addCell(final C cell) {
+        synchronized (cells) {
             cells.add(cell);
         }
     }
 
     /**
-	 * Creates a new cell for this mesh (without adding it), using the specified
-	 * vertex indices.
-	 * <p>
-	 * <p>
-	 * This method is internally used when calling {@link #addCell(Cell3D)},
-	 * allowing overriding classes to provide their own {@link Polygon3D}
-	 * implementation.
-	 * 
-	 * @param type
-	 *            the type of cell to add
-	 * @param vertexIndices
-	 *            the indices of the vertices forming the mesh, in
-	 *            counter-clockwise order
-	 * @return the newly created face
-	 */
+     * Creates a new cell for this mesh (without adding it), using the specified
+     * vertex indices.
+     * <p>
+     * <p>
+     * This method is internally used when calling {@link #addCell(Cell3D)},
+     * allowing overriding classes to provide their own {@link Polygon3D}
+     * implementation.
+     *
+     * @param type          the type of cell to add
+     * @param vertexIndices the indices of the vertices forming the mesh, in
+     *                      counter-clockwise order
+     * @return the newly created face
+     */
     protected abstract C createCell(CellType type, int... vertexIndices);
 
     /**
-     * @param index
-     *        the index of the cell to retrieve
+     * @param index the index of the cell to retrieve
      * @return the cell stored at the specified index
      */
-    public C getCell(final int index)
-    {
+    public C getCell(final int index) {
         return cells.get(index);
     }
 
     /**
      * @return the number of cells in this mesh
      */
-    public int getNumberOfCells()
-    {
+    public int getNumberOfCells() {
         return cells.size();
     }
 
     /**
-     * @return a safe copy of the list of cells (changes to this list will not affect the mesh)
+     * @return a safe copy of the cell list (changes to this list will not affect the mesh)
      */
-    public List<C> getCells()
-    {
-        return new ArrayList<C>(cells);
+    public List<C> getCells() {
+        return new ArrayList<>(cells);
     }
 
     /**
      * Adds the specified vertex to this mesh (if no vertex already exists at this vertex location)
-     * 
-     * @param v
-     *        the vertex to add
+     *
+     * @param v the vertex to add
      * @return the index of the new vertex, or that of the old vertex at that location (if any)
      */
-    public int addVertex(final Vertex3D v)
-    {
+    public int addVertex(final Vertex3D v) {
         return addVertex(v, true, true);
     }
 
     /**
-	 * Adds a new vertex to this mesh and returns its index in the vertex array.
-	 * Based on the specified options, if a vertex already existed at that
-	 * location, this method will return the index of the existing vertex
-	 * instead of adding a new one.
-	 * 
-	 * @param v
-	 *            the coordinates of the vertex to create and add
-	 *            <p>
-	 *            <p>
-	 * @param mergeDuplicates
-	 *            <ul>
-	 *            <li><code>true</code>: checks whether this mesh already
-	 *            contains a vertex at the specified position (and should return
-	 *            its index instead of adding the specified vertex)</li>
-	 *            <li><code>false</code>: adds the specified vertex to the list,
-	 *            whether or not another exists at the same location (this is
-	 *            recommended when loading VTK files which should be consistent
-	 *            by default)</li>
-	 *            </ul>
-	 * @param tidy
-	 *            if the vertex is added, this parameter indicates how the
-	 *            vertex should be stored:
-	 *            <p>
-	 *            <ul>
-	 *            <li><code>true</code>: the vertex is stored in the first
-	 *            available <code>null</code> position in the array (or at the
-	 *            end if none exist)</li>
-	 *            <li><code>false</code>: the vertex is always stored at the end
-	 *            of the array (this is only recommended when loading existing
-	 *            mesh data to preserve vertex ordering)</li>
-	 *            </ul>
-	 * @return the index of the new vertex, or that of the old vertex at that
-	 *         location (if any)
-	 */
-    public int addVertex(final Vertex3D v, final boolean tidy, final boolean mergeDuplicates)
-    {
-        if (!tidy && !mergeDuplicates)
-        {
+     * Adds a new vertex to this mesh and returns its index in the vertex array.
+     * Based on the specified options, if a vertex already existed at that
+     * location, this method will return the index of the existing vertex
+     * instead of adding a new one.
+     *
+     * @param v               the coordinates of the vertex to create and add
+     *                        <p>
+     *                        <p>
+     * @param mergeDuplicates <ul>
+     *                        <li><code>true</code>: checks whether this mesh already
+     *                        contains a vertex at the specified position (and should return
+     *                        its index instead of adding the specified vertex)</li>
+     *                        <li><code>false</code>: adds the specified vertex to the list,
+     *                        whether or not another exists at the same location (this is
+     *                        recommended when loading VTK files which should be consistent
+     *                        by default)</li>
+     *                        </ul>
+     * @param tidy            if the vertex is added, this parameter indicates how the
+     *                        vertex should be stored:
+     *                        <p>
+     *                        <ul>
+     *                        <li><code>true</code>: the vertex is stored in the first
+     *                        available <code>null</code> position in the array (or at the
+     *                        end if none exist)</li>
+     *                        <li><code>false</code>: the vertex is always stored at the end
+     *                        of the array (this is only recommended when loading existing
+     *                        mesh data to preserve vertex ordering)</li>
+     *                        </ul>
+     * @return the index of the new vertex, or that of the old vertex at that
+     * location (if any)
+     */
+    public int addVertex(final Vertex3D v, final boolean tidy, final boolean mergeDuplicates) {
+        if (!tidy && !mergeDuplicates) {
             // fast version (ideal to load organized data)
             vertices.add(v);
             return vertices.size() - 1;
         }
 
         int nullIndex = -1;
-        for (int index = 0; index < vertices.size(); index++)
-        {
+        for (int index = 0; index < vertices.size(); index++) {
             final Vertex3D existingVertex = vertices.get(index);
 
-            if (existingVertex == null)
-            {
+            if (existingVertex == null) {
                 // not merging duplicate ?
-                if (!mergeDuplicates)
-                {
+                if (!mergeDuplicates) {
                     // use first free slot (as tidy is enabled)
                     setVertex(index, v);
                     return index;
@@ -1277,53 +1172,45 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         }
 
         // if there is a free spot in the list, use it
-        if (tidy && (nullIndex >= 0))
-        {
+        if (tidy && (nullIndex >= 0)) {
             setVertex(nullIndex, v);
             return nullIndex;
         }
-        else
-        {
+        else {
             vertices.add(v);
             return vertices.size() - 1;
         }
     }
 
     /**
-	 * Creates a new vertex for this mesh (without adding it), using the
-	 * specified 3D coordinates.
-	 * <p>
-	 * This method is internally used when calling {@link #addVertex(Vertex3D)},
-	 * allowing overriding classes to provide their own {@link Vertex3D}
-	 * implementation.
-	 * 
-	 * @param position
-	 *            the position of the created vertex
-	 * @return the newly created vertex
-	 */
-    public Vertex3D createVertex(final Point3d position)
-    {
+     * Creates a new vertex for this mesh (without adding it), using the
+     * specified 3D coordinates.
+     * <p>
+     * This method is internally used when calling {@link #addVertex(Vertex3D)},
+     * allowing overriding classes to provide their own {@link Vertex3D}
+     * implementation.
+     *
+     * @param position the position of the created vertex
+     * @return the newly created vertex
+     */
+    public Vertex3D createVertex(final Point3d position) {
         return new Vertex3D(position);
     }
 
     /**
-     * @param index
      * @return the vertex at the specified index in the buffer
      */
-    public Vertex3D getVertex(final int index)
-    {
+    public Vertex3D getVertex(final int index) {
         return vertices.get(index);
     }
 
     /**
+     * @param excludeNullElements set to <code>true</code> if <code>null</code> elements should not be counted
+     *                            (yielding the actual number of vertices, which may be smaller than the buffer
+     *                            size)
      * @return the size of the vertex buffer
-     * @param excludeNullElements
-     *        set to <code>true</code> if <code>null</code> elements should not be counted
-     *        (yielding the actual number of vertices, which may be smaller than the buffer
-     *        size)
      */
-    public int getNumberOfVertices(final boolean excludeNullElements)
-    {
+    public int getNumberOfVertices(final boolean excludeNullElements) {
         if (!excludeNullElements)
             return vertices.size();
 
@@ -1336,24 +1223,21 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     /**
-     * @return a shallow copy of the list of vertices. Adding or removing elements from this list
-     *         will not affect the mesh, however modifying the vertices inside this list will.
+     * @return a shallow copy of the vertices list.
+     * Adding or removing elements from this list will not affect the mesh,
+     * however, modifying the vertices inside this list will.
      */
-    public List<Vertex3D> getVertices()
-    {
-        return new ArrayList<Vertex3D>(vertices);
+    public List<Vertex3D> getVertices() {
+        return new ArrayList<>(vertices);
     }
 
     /**
      * Replaces the vertex at the specified index in the vertex buffer
-     * 
-     * @param index
-     *        the index of the vertex to replace
-     * @param vertex
-     *        the new vertex
+     *
+     * @param index  the index of the vertex to replace
+     * @param vertex the new vertex
      */
-    public void setVertex(final int index, final Vertex3D vertex)
-    {
+    public void setVertex(final int index, final Vertex3D vertex) {
         if (vertex == null)
             deleteVertex(index);
         else
@@ -1363,30 +1247,26 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     /**
      * Set vertex at given index to <i>null</i> (take care of updating cells and neighbors)
      */
-    public void deleteVertex(final int index)
-    {
+    public void deleteVertex(final int index) {
         final Vertex3D v = vertices.get(index);
 
         // nothing to do
         if (v == null)
             return;
 
-        synchronized (cells)
-        {
+        synchronized (cells) {
             // remove cells referencing that vertex
             for (int i = cells.size() - 1; i >= 0; i--)
                 if (cells.get(i).contains(index))
                     cells.remove(i);
         }
 
-        synchronized (vertices)
-        {
-            final Integer indexInteger = Integer.valueOf(index);
+        synchronized (vertices) {
+            final Integer indexInteger = index;
 
             // remove from neighborhood
-            for (final Integer n : v.neighbors)
-            {
-                final Vertex3D vn = vertices.get(n.intValue());
+            for (final Integer n : v.neighbors) {
+                final Vertex3D vn = vertices.get(n);
 
                 if (vn != null)
                     vn.neighbors.remove(indexInteger);
@@ -1399,23 +1279,17 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
     /**
      * Checks mesh integrity and will print out to the console any missing vertex
-     * 
+     *
      * @return <code>true</code> if the check succeeded.
      */
-    public boolean checkMeshIntegrity()
-    {
+    public boolean checkMeshIntegrity() {
         boolean success = true;
 
-        synchronized (cells)
-        {
-            synchronized (vertices)
-            {
-                for (final C cell : cells)
-                {
-                    for (final int i : cell.vertexIndices)
-                    {
-                        if (vertices.get(i) == null)
-                        {
+        synchronized (cells) {
+            synchronized (vertices) {
+                for (final C cell : cells) {
+                    for (final int i : cell.vertexIndices) {
+                        if (vertices.get(i) == null) {
                             success = false;
                             System.err.println("missing vertex : " + i);
                         }
@@ -1431,14 +1305,11 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
      * Optimizes the vertex buffer by shifting all elements such that there are no <code>null</code>
      * elements intermingled between vertices.
      */
-    public void optimizeVertexBuffer()
-    {
+    public void optimizeVertexBuffer() {
         boolean needOpti = false;
 
-        for (final Vertex3D v : vertices)
-        {
-            if (v == null)
-            {
+        for (final Vertex3D v : vertices) {
+            if (v == null) {
                 needOpti = true;
                 break;
             }
@@ -1449,28 +1320,23 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
             return;
 
         final int nVerts = vertices.size();
-        final List<Vertex3D> newVertices = new ArrayList<Vertex3D>(nVerts);
+        final List<Vertex3D> newVertices = new ArrayList<>(nVerts);
         int blankSpaces = 0;
 
-        synchronized (vertices)
-        {
-            synchronized (cells)
-            {
-                for (int i = 0; i < nVerts; i++)
-                {
+        synchronized (vertices) {
+            synchronized (cells) {
+                for (int i = 0; i < nVerts; i++) {
                     final Vertex3D vertex = vertices.get(i);
 
                     // count the number of consecutive blank spaces
-                    if (vertex == null)
-                    {
+                    if (vertex == null) {
                         blankSpaces++;
                         continue;
                     }
 
                     newVertices.add(vertex);
 
-                    if (blankSpaces > 0)
-                    {
+                    if (blankSpaces > 0) {
                         // redirect all cells to this space
                         for (final C cell : cells)
                             cell.replace(i, i - blankSpaces);
@@ -1485,13 +1351,11 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     /**
-     * @param scale
-     *        scale vector (pixel size) if we want to compute major axis using real metrics. Set it to <code>null</code> if not needed.
-     * @return The major axis of this contour, i.e. an unnormalized vector linking the two most
-     *         distant contour points (the orientation of this vector is arbitrary)
+     * @param scale scale vector (pixel size) if we want to compute major axis using real metrics. Set it to <code>null</code> if not needed.
+     * @return The major axis of this contour, i.e., an unnormalized vector linking the two most
+     * distant contour points (the orientation of this vector is arbitrary)
      */
-    public Vector3d getMajorAxis(final Tuple3d scale)
-    {
+    public Vector3d getMajorAxis(final Tuple3d scale) {
         final Vector3d axis = new Vector3d();
         final int nbPoints = vertices.size();
 
@@ -1502,10 +1366,8 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         final Point3d p1 = new Point3d();
         final Point3d p2 = new Point3d();
 
-        synchronized (vertices)
-        {
-            for (int i = 0; i < nbPoints; i++)
-            {
+        synchronized (vertices) {
+            for (int i = 0; i < nbPoints; i++) {
                 final Vertex3D v1 = vertices.get(i);
                 if (v1 == null)
                     continue;
@@ -1513,8 +1375,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
                 // scale and get result in p1
                 vecMul(v1.position, scale, p1);
 
-                for (int j = i + 1; j < nbPoints; j++)
-                {
+                for (int j = i + 1; j < nbPoints; j++) {
                     final Vertex3D v2 = vertices.get(j);
                     if (v2 == null)
                         continue;
@@ -1526,8 +1387,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
                     final double dSq = vec.lengthSquared();
 
-                    if (dSq > maxDistSq)
-                    {
+                    if (dSq > maxDistSq) {
                         maxDistSq = dSq;
                         axis.set(vec);
                     }
@@ -1539,7 +1399,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     // /**
-    // * @return The major axis of this contour, i.e. an unnormalized vector linking the two most
+    // * @return The major axis of this contour, i.e., an unnormalized vector linking the two most
     // * distant contour points (the orientation of this vector is arbitrary)
     // */
     // public Vector3d getMajorAxis()
@@ -1569,14 +1429,11 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     // }
 
     /**
-     * @param scale
-     *        scale vector (pixel size) if we want to get mass axis using real metrics. Set it to <code>null</code> if not needed.
+     * @param scale scale vector (pixel size) if we want to get mass axis using real metrics. Set it to <code>null</code> if not needed.
      * @return The mass center
      */
-    public Point3d getMassCenter(final Tuple3d scale)
-    {
-        if (propertiesNeedUpdate)
-        {
+    public Point3d getMassCenter(final Tuple3d scale) {
+        if (propertiesNeedUpdate) {
             updateProperties();
             propertiesNeedUpdate = false;
         }
@@ -1592,13 +1449,12 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     /**
      * Calculates Returns a 3D cuboid representing the contour's bounding box. The bounding box is
      * defined as the smallest cuboid that entirely contains the contour.
-     * 
+     *
      * @return a {@link icy.type.rectangle.Rectangle3D.Double} object containing the bounding box of
-     *         this mesh, expressed in voxel (image) space
+     * this mesh, expressed in voxel (image) space
      */
     @Override
-    public Rectangle3D computeBounds3D()
-    {
+    public Rectangle3D computeBounds3D() {
         // if (pixelSize.x == 0 || pixelSize.y == 0 || pixelSize.z == 0)
         // {
         // throw new RuntimeException(
@@ -1608,8 +1464,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE, minZ = Double.MAX_VALUE;
         double maxX = 0, maxY = 0, maxZ = 0;
 
-        for (final Vertex3D v : getVertices())
-        {
+        for (final Vertex3D v : getVertices()) {
             if (v == null)
                 continue;
 
@@ -1638,11 +1493,9 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         return new Rectangle3D.Double(minX, minY, minZ, maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1);
     }
 
-    public BooleanMask3D getMask()
-    {
+    public BooleanMask3D getMask() {
         // ensure boolean mask is up to date
-        if (maskNeedUpdate)
-        {
+        if (maskNeedUpdate) {
             mask = buildMask();
             roiMask = new ROI3DArea(mask);
             ROIUtil.copyROIProperties(this, roiMask, false);
@@ -1652,11 +1505,9 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         return mask;
     }
 
-    public ROI3DArea getROIMask()
-    {
+    public ROI3DArea getROIMask() {
         // ensure boolean mask is up to date
-        if (maskNeedUpdate)
-        {
+        if (maskNeedUpdate) {
             mask = buildMask();
             roiMask = new ROI3DArea(mask);
             ROIUtil.copyROIProperties(this, roiMask, false);
@@ -1668,18 +1519,14 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
     public abstract BooleanMask3D buildMask();
 
-    protected void updateProperties()
-    {
+    protected void updateProperties() {
         // update internal properties (mass center only here)
         final Point3d center = new Point3d();
         int numVertices = 0;
 
-        synchronized (vertices)
-        {
-            for (final Vertex3D v : vertices)
-            {
-                if (v != null)
-                {
+        synchronized (vertices) {
+            for (final Vertex3D v : vertices) {
+                if (v != null) {
                     center.add(v.position);
                     numVertices++;
                 }
@@ -1695,23 +1542,19 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
 
     /**
      * Rotates this mesh by a specified angle in radians. The axis of rotation (specified in the
-     * parameter) is assumed to pass through the center of mass of this mesh, and the rotation angle
+     * parameter) is assumed to pass through the mass center of this mesh, and the rotation angle
      * is assumed anti-clockwise when facing the vector.
-     * 
-     * @param axisAngle
-     *        the axis and angle (in radians) of rotation
+     *
+     * @param axisAngle the axis and angle (in radians) of rotation
      */
-    public void rotate(final AxisAngle4d axisAngle)
-    {
+    public void rotate(final AxisAngle4d axisAngle) {
         final Matrix3d r = new Matrix3d();
         r.set(axisAngle);
 
         final Point3d center = getMassCenter(null);
 
-        synchronized (vertices)
-        {
-            for (final Vertex3D v : vertices)
-            {
+        synchronized (vertices) {
+            for (final Vertex3D v : vertices) {
                 if (v == null)
                     continue;
 
@@ -1728,25 +1571,21 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     @Override
-    public boolean canTranslate()
-    {
+    public boolean canTranslate() {
         return true;
     }
 
     @Override
-    public void translate(final double dx, final double dy, final double dz)
-    {
+    public void translate(final double dx, final double dy, final double dz) {
         translate(new Vector3d(dx, dy, dz));
     }
 
     /**
      * Translates (every vertex of) this mesh by the specified vector
-     * 
-     * @param vector
-     *        the translation vector
+     *
+     * @param vector the translation vector
      */
-    public void translate(final Vector3d vector)
-    {
+    public void translate(final Vector3d vector) {
         if (vector.lengthSquared() == 0.0)
             return;
 
@@ -1755,8 +1594,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
         // System.out.println("oups !");
         // }
 
-        synchronized (vertices)
-        {
+        synchronized (vertices) {
             for (final Vertex3D v : vertices)
                 if (v != null)
                     v.position.add(vector);
@@ -1766,8 +1604,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     @Override
-    public boolean contains(final double x, final double y, final double z, final double sizeX, final double sizeY, final double sizeZ)
-    {
+    public boolean contains(final double x, final double y, final double z, final double sizeX, final double sizeY, final double sizeZ) {
         // return getROIMask().contains(x, y, z, sizeX, sizeY, sizeZ);
 
         // the specified box is contained if all of its corners are
@@ -1785,21 +1622,16 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
             return false;
         if (!contains(x, y + sizeY, z + sizeZ))
             return false;
-        if (!contains(x + sizeX, y + sizeY, z + sizeZ))
-            return false;
-
-        return true;
+        return contains(x + sizeX, y + sizeY, z + sizeZ);
     }
 
     @Override
-    public boolean hasSelectedPoint()
-    {
+    public boolean hasSelectedPoint() {
         return false;
     }
 
     @Override
-    public boolean intersects(final double x, final double y, final double z, final double sizeX, final double sizeY, final double sizeZ)
-    {
+    public boolean intersects(final double x, final double y, final double z, final double sizeX, final double sizeY, final double sizeZ) {
         return getROIMask().intersects(x, y, z, sizeX, sizeY, sizeZ);
 
         // FIXME: What ?? i guess this don't really work... (Stephane)
@@ -1825,35 +1657,30 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D
     }
 
     /**
-     * default implementation
+     * Default implementation
      */
     @Override
-    public boolean contains(final double x, final double y, final double z)
-    {
+    public boolean contains(final double x, final double y, final double z) {
         return getROIMask().contains(x, y, z);
     }
 
     @Override
-    public BooleanMask2D getBooleanMask2D(final int z, final boolean inclusive) throws InterruptedException
-    {
+    public BooleanMask2D getBooleanMask2D(final int z, final boolean inclusive) throws InterruptedException {
         return getROIMask().getBooleanMask2D(z, inclusive);
     }
 
     @Override
-    public BooleanMask3D getBooleanMask(final boolean inclusive) throws InterruptedException
-    {
+    public BooleanMask3D getBooleanMask(final boolean inclusive) throws InterruptedException {
         return getROIMask().getBooleanMask(inclusive);
     }
 
     @Override
-    public double getNumberOfContourPoints() throws InterruptedException
-    {
+    public double getNumberOfContourPoints() throws InterruptedException {
         return getROIMask().getNumberOfContourPoints();
     }
 
     @Override
-    public double getNumberOfPoints() throws InterruptedException
-    {
+    public double getNumberOfPoints() throws InterruptedException {
         return getROIMask().getNumberOfPoints();
     }
 }

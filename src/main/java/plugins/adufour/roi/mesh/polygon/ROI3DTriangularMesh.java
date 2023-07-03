@@ -1,13 +1,22 @@
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package plugins.adufour.roi.mesh.polygon;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
-
-import javax.vecmath.Point3d;
 
 import icy.roi.ROI3D;
 import icy.type.collection.array.Array1DUtil;
@@ -15,6 +24,9 @@ import icy.type.rectangle.Rectangle3D;
 import plugins.adufour.quickhull.QuickHull3D;
 import plugins.adufour.roi.mesh.MeshTopologyException;
 import plugins.adufour.roi.mesh.Vertex3D;
+
+import javax.vecmath.Point3d;
+import java.util.*;
 
 /**
  * Special implementation of {@link ROI3DPolygonalMesh} where the surface is
@@ -31,44 +43,37 @@ import plugins.adufour.roi.mesh.Vertex3D;
  * "http://upload.wikimedia.org/wikipedia/commons/f/fb/Dolphin_triangle_mesh.png"
  * alt="">
  * <p>
- * 
- * @see <a href="http://en.wikipedia.org/wiki/Polygon_mesh">Polygon mesh
- *      (Wikipedia)</a>
+ *
  * @author Alexandre Dufour
+ * @see <a href="http://en.wikipedia.org/wiki/Polygon_mesh">Polygon mesh
+ * (Wikipedia)</a>
  */
-public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
-{
+public class ROI3DTriangularMesh extends ROI3DPolygonalMesh {
     /**
      * <h1>DO NOT USE! This constructor is for XML loading purposes only</h1>
      */
-    public ROI3DTriangularMesh()
-    {
+    public ROI3DTriangularMesh() {
         //
     }
 
     /**
      * Creates a regularly-sampled triangular mesh from the specified ROI.
-     * 
-     * @param sampling
-     *        the mesh sampling (i.e. the average distance between any two neighbor vertices of
-     *        the mesh). It is usually recommended that this sampling is set to approximately
-     *        20% of the roi's shortest diameter
-     * @param roi
-     *        the region of interest around which the mesh should be created
+     *
+     * @param sampling the mesh sampling (i.e., the average distance between any two neighbor vertices of
+     *                 the mesh).
+     *                 It is usually recommended that this sampling is set to approximately 20% of
+     *                 the roi's shortest diameter
+     * @param roi      the region of interest around which the mesh should be created
      */
-    public ROI3DTriangularMesh(final double sampling, final ROI3D roi)
-    {
-        if (roi instanceof ROI3DTriangularMesh)
-        {
+    public ROI3DTriangularMesh(final double sampling, final ROI3D roi) {
+        if (roi instanceof ROI3DTriangularMesh) {
             final ROI3DTriangularMesh roiTriangularMesh = (ROI3DTriangularMesh) roi;
 
             setVertexData(roiTriangularMesh.vertices, true);
             setCellData(roiTriangularMesh.cells, true);
         }
-        else
-        {
-            try
-            {
+        else {
+            try {
                 // convex hull
                 final int[] pts = roi.getBooleanMask(true).getContourPointsAsIntArray();
                 final double[] pts_dbl = Array1DUtil.intArrayToDoubleArray(pts, true);
@@ -80,8 +85,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
 
                 loadFromQuickHull(qh3);
             }
-            catch (final Exception e)
-            {
+            catch (final Exception e) {
                 vertices.clear();
                 cells.clear();
                 System.err
@@ -90,13 +94,11 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                 setIcosahedron(roi.getBounds3D(), sampling);
             }
 
-            try
-            {
+            try {
                 // finish with a proper sampling
                 resample(sampling, 0.4);
             }
-            catch (final MeshTopologyException e)
-            {
+            catch (final MeshTopologyException e) {
                 // just ignore here (resampling failed, not a big issue)
                 System.err.println("Warning: couldn't resample initial contour:");
                 System.err.println(e.getMessage());
@@ -116,8 +118,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
         roiChanged(true);
     }
 
-    private void setIcosahedron(final Rectangle3D bounds, final double sampling)
-    {
+    private void setIcosahedron(final Rectangle3D bounds, final double sampling) {
         // start from a regular icosahedron using the golden number PHI
         // distance between any vertex pair: 2
         // radius of the bounding sphere: PHI
@@ -182,8 +183,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
 
         final Point3d center = new Point3d(minX + halfSizeX, minY + halfSizeY, minZ + halfSizeZ);
 
-        for (final Vertex3D v : vertices)
-        {
+        for (final Vertex3D v : vertices) {
             // scale to the final size
             v.position.x *= halfSizeX / PHI;
             v.position.y *= halfSizeY / PHI;
@@ -201,8 +201,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
         // the resolution is now stretched...
         double minResolution = 4 * Math.min(halfSizeX, Math.min(halfSizeY, halfSizeZ)) / PHI;
 
-        while (minResolution > (2 * sampling))
-        {
+        while (minResolution > (2 * sampling)) {
             // do global subdivisions (faster)
             subdivide();
             minResolution /= 2;
@@ -210,8 +209,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
     }
 
     @Override
-    public Polygon3D createCell(final int... vertexIndices)
-    {
+    public Polygon3D createCell(final int... vertexIndices) {
         if (vertexIndices.length != 3)
             throw new IllegalArgumentException("A triangle must be defined by exactly 3 vertex indices");
 
@@ -220,20 +218,15 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
 
     /**
      * Deletes a tetrahedron from the mesh, and fill the hole with a new face
-     * 
-     * @param topVertex
-     *        the vertex at the top of the tetrahedron
-     * @param v1
-     *        one of the three vertices at the base of the tetrahedron
-     * @param v2
-     *        another of the vertices at the base of the tetrahedron
+     *
+     * @param topVertex the vertex at the top of the tetrahedron
+     * @param v1        one of the three vertices at the base of the tetrahedron
+     * @param v2        another of the vertices at the base of the tetrahedron
      */
-    private void deleteTetrahedron(final int topVertex, final int v1, final int v2)
-    {
+    private void deleteTetrahedron(final int topVertex, final int v1, final int v2) {
         // find the third vertex at the base of the tetrahedron
         int v3 = -1;
-        for (final int n : vertices.get(topVertex).neighbors)
-        {
+        for (final int n : vertices.get(topVertex).neighbors) {
             if ((n != v1) && (n != v2))
                 v3 = n;
 
@@ -241,8 +234,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
             vertices.get(n).neighbors.remove(topVertex);
         }
 
-        for (int i = 0; i < cells.size(); i++)
-        {
+        for (int i = 0; i < cells.size(); i++) {
             if (cells.get(i).contains(topVertex))
                 cells.remove(i--);
         }
@@ -254,16 +246,13 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
         deleteVertex(topVertex);
     }
 
-    private static void extractVertices(final Integer seed, final Set<Vertex3D> visitedVertices, final List<Vertex3D> oldPoints,
-            final List<Vertex3D> newPoints)
-    {
-        final Stack<Integer> seeds = new Stack<Integer>();
+    private static void extractVertices(final Integer seed, final Set<Vertex3D> visitedVertices, final List<Vertex3D> oldPoints, final List<Vertex3D> newPoints) {
+        final Stack<Integer> seeds = new Stack<>();
 
         seeds.add(seed);
 
-        while (!seeds.isEmpty())
-        {
-            final int currentVertexIndex = seeds.pop().intValue();
+        while (!seeds.isEmpty()) {
+            final int currentVertexIndex = seeds.pop();
             final Vertex3D currentVertex = oldPoints.get(currentVertexIndex);
 
             // don't process a visited vertex
@@ -277,18 +266,14 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
 
             // add the neighbors to the list of seeds
             for (final int n : currentVertex.neighbors)
-                seeds.push(Integer.valueOf(n));
+                seeds.push(n);
         }
     }
 
-    private static void extractFaces(final List<Vertex3D> pointsList, final List<Polygon3D> oldFaces, final List<Polygon3D> newFaces)
-    {
-        for (final Polygon3D face : oldFaces)
-        {
-            for (final int i : face.vertexIndices)
-            {
-                if (pointsList.get(i) != null)
-                {
+    private static void extractFaces(final List<Vertex3D> pointsList, final List<Polygon3D> oldFaces, final List<Polygon3D> newFaces) {
+        for (final Polygon3D face : oldFaces) {
+            for (final int i : face.vertexIndices) {
+                if (pointsList.get(i) != null) {
                     newFaces.add(face);
                     break;
                 }
@@ -298,32 +283,24 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
 
     /**
      * Splits the current contour using the 'cutting' face defined by the given vertices. <br>
-     * 
+     *
      * <pre>
      * How this works:
-     *  - separate all vertices on each side of the cutting face (without considering the vertices of the cutting face), 
+     *  - separate all vertices on each side of the cutting face (without considering the vertices of the cutting face),
      *  - separate all faces touching at least one vertex of each group (will include faces touching the cutting face),
      *  - create a contour with each group of vertices and faces,
      *  - add the cutting face and its vertices to each created contour
      * </pre>
-     * 
-     * @param v1
-     * @param v2
-     * @param v3
-     * @throws MeshTopologyException
      */
-    private void splitContourAtVertices(final int v1, final int v2, final int v3) throws MeshTopologyException
-    {
+    private void splitContourAtVertices(final int v1, final int v2, final int v3) throws MeshTopologyException {
         List<Polygon3D> resultFaces = null;
         List<Vertex3D> resultVertices = null;
 
         // need synch access
-        synchronized (vertices)
-        {
-            synchronized (cells)
-            {
+        synchronized (vertices) {
+            synchronized (cells) {
                 final int numVertices = vertices.size();
-                final Set<Vertex3D> visitedVertices = new HashSet<Vertex3D>(numVertices);
+                final Set<Vertex3D> visitedVertices = new HashSet<>(numVertices);
 
                 // mark the vertices from the cutting triangle as visited
                 // => that should separate the mesh into 2 (open) meshes
@@ -332,36 +309,30 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                 visitedVertices.add(vertices.get(v3));
 
                 // the mesh split into two components, extract them via connected component analysis
-                for (int child = 0; child < 2; child++)
-                {
+                for (int child = 0; child < 2; child++) {
                     // use the first non-visited vertex as seed
                     Integer seed = null;
 
-                    for (int i = 0; i < numVertices; i++)
-                    {
+                    for (int i = 0; i < numVertices; i++) {
                         final Vertex3D v = vertices.get(i);
 
-                        if ((v != null) && !visitedVertices.contains(v))
-                        {
-                            seed = Integer.valueOf(i);
+                        if ((v != null) && !visitedVertices.contains(v)) {
+                            seed = i;
                             break;
                         }
                     }
 
-                    if (seed == null)
-                    {
+                    if (seed == null) {
                         // no seed for first child (should not happen)
-                        if (child == 0)
-                        {
+                        if (child == 0) {
                             System.err.println("While splitting mesh at vertices (" + v1 + "," + v2 + "," + v3 + "):");
                             System.err.println("Couldn't create child mesh #" + (child + 1) + ": no more seeds");
                             throw new MeshTopologyException(ROI3DTriangularMesh.this, null);
                         }
                     }
-                    else
-                    {
-                        final List<Polygon3D> newFaces = new ArrayList<Polygon3D>();
-                        final List<Vertex3D> newVertices = new ArrayList<Vertex3D>(numVertices);
+                    else {
+                        final List<Polygon3D> newFaces = new ArrayList<>();
+                        final List<Vertex3D> newVertices = new ArrayList<>(numVertices);
 
                         // create a null empty list that will be used to clone the source vertices
                         for (int i = 0; i < numVertices; i++)
@@ -373,8 +344,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                         // Fill the hole using the cutting face
 
                         // First, add the 3 vertices from the cut
-                        for (final int v : new int[] {v1, v2, v3})
-                        {
+                        for (final int v : new int[]{v1, v2, v3}) {
                             final Vertex3D newV = vertices.get(v).clone();
 
                             newVertices.set(v, newV);
@@ -383,23 +353,14 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                             // remove those on the wrong side of the cut
                             // => they should point to null in the child's vertex list
 
-                            final Iterator<Integer> it = newV.neighbors.iterator();
-                            while (it.hasNext())
-                            {
-                                final int n = it.next();
-
-                                if ((n != v1) && (n != v2) && (n != v3) && (newVertices.get(n) == null))
-                                    // newV should not point to n anymore
-                                    it.remove();
-                            }
+                            // newV should not point to n anymore
+                            newV.neighbors.removeIf(n -> (n != v1) && (n != v2) && (n != v3) && (newVertices.get(n) == null));
                         }
 
                         // Add the new face used for the cut
                         // => find any edge (e.g. v1-v2) to check its ordering
-                        for (final Polygon3D f : newFaces)
-                        {
-                            if (f.contains(v1) && f.contains(v2))
-                            {
+                        for (final Polygon3D f : newFaces) {
+                            if (f.contains(v1) && f.contains(v2)) {
                                 // if the edge v1-v2 is counter-clockwise in f,
                                 // the new face must be clockwise and vice-versa
                                 newFaces.add(f.isEdgeOrdered(v1, v2) ? createCell(v1, v3, v2) : createCell(v1, v2, v3));
@@ -408,11 +369,9 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                         }
 
                         // more than 10 faces ? --> valid
-                        if (newFaces.size() > 10)
-                        {
+                        if (newFaces.size() > 10) {
                             // if we obtain 2 meshes with more than 10 faces then we need to create a new mesh (done through MeshTopologyException...)
-                            if (resultVertices != null)
-                            {
+                            if (resultVertices != null) {
                                 final ROI3DTriangularMesh[] children = new ROI3DTriangularMesh[2];
 
                                 // first child
@@ -478,8 +437,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
         // }
     }
 
-    private ROI3DTriangularMesh buildMesh(final List<Vertex3D> vertices, final List<Polygon3D> faces)
-    {
+    private ROI3DTriangularMesh buildMesh(final List<Vertex3D> vertices, final List<Polygon3D> faces) {
         final ROI3DTriangularMesh result = new ROI3DTriangularMesh();
 
         result.setColor(getColor());
@@ -493,21 +451,18 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
         return result;
     }
 
-    private void subdivide()
-    {
-        final List<Polygon3D> oldFaces = new ArrayList<Polygon3D>(cells);
+    private void subdivide() {
+        final List<Polygon3D> oldFaces = new ArrayList<>(cells);
 
         beginUpdate();
-        try
-        {
+        try {
             cells.clear();
 
             for (final Vertex3D v : vertices)
                 if (v != null)
                     v.neighbors.clear();
 
-            for (final Polygon3D f : oldFaces)
-            {
+            for (final Polygon3D f : oldFaces) {
                 final int v1 = f.vertexIndices[0];
                 final int v2 = f.vertexIndices[1];
                 final int v3 = f.vertexIndices[2];
@@ -522,16 +477,14 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                 addCell(centerv1v2, centerv2v3, centerv3v1);
             }
         }
-        finally
-        {
+        finally {
             endUpdate();
         }
 
         roiChanged(true);
     }
 
-    private int addVertexBetween(final int v1, final int v2)
-    {
+    private int addVertexBetween(final int v1, final int v2) {
         // Create the middle vertex using v1
         final Point3d p = new Point3d(vertices.get(v1).position);
 
@@ -544,17 +497,13 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
     /**
      * Re-samples the mesh surface such that the distance between any two neighbor vertices of the
      * surface is close to the specified distance (with specified tolerance)
-     * 
-     * @param distance
-     *        average target distance between mesh vertices
-     * @param tolerance
-     *        the tolerance around the target resolution (percentage between 0 and 1). A
-     *        tolerance of 40% (0.4) is recommended
-     * @throws MeshTopologyException
-     *         if the mesh becomes inconsistent (splitting or vanishing)
+     *
+     * @param distance  average target distance between mesh vertices
+     * @param tolerance the tolerance around the target resolution (percentage between 0 and 1). A
+     *                  tolerance of 40% (0.4) is recommended
+     * @throws MeshTopologyException if the mesh becomes inconsistent (splitting or vanishing)
      */
-    public void resample(final double distance, final double tolerance) throws MeshTopologyException
-    {
+    public void resample(final double distance, final double tolerance) throws MeshTopologyException {
         // safeguard
         if (tolerance < 0 || tolerance > 1)
             throw new IllegalArgumentException("Invalid tolerance: " + tolerance);
@@ -566,8 +515,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
         final double maxAllowedDist = maxADist * maxADist;
 
         // if there are 2 faces only in the mesh, it should be destroyed
-        if (cells.size() < 10)
-        {
+        if (cells.size() < 10) {
             System.out.println(getName() + " has vanished (too small)");
             throw new MeshTopologyException(ROI3DTriangularMesh.this, null);
         }
@@ -575,8 +523,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
         boolean roiChanged = false;
         int cpt = -1;
 
-        while (true)
-        {
+        while (true) {
             cpt++;
 
             // we are looking for 2 faces f1 = a-b-c1 and f2 = b-a-c2
@@ -592,8 +539,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
             final int[] f1v231 = new int[3];
             final int[] f1v312 = new int[3];
 
-            for (int i = 0; i < cells.size(); i++)
-            {
+            for (int i = 0; i < cells.size(); i++) {
                 f1 = getCell(i);
 
                 f1v123 = f1.vertexIndices;
@@ -610,26 +556,22 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                 int split_e1 = -1, split_e2 = -1, split_f1v3 = -1;
 
                 // find the extreme edge sizes
-                for (int v = 0; v < 3; v++)
-                {
+                for (int v = 0; v < 3; v++) {
                     // --> null pointer here ??
                     final Vertex3D v1 = vertices.get(f1v123[v]);
                     final Vertex3D v2 = vertices.get(f1v231[v]);
 
                     // can happen sometime (need to figure how)
-                    if ((v1 != null) && (v2 != null))
-                    {
+                    if ((v1 != null) && (v2 != null)) {
                         final double edgeDist = v1.position.distanceSquared(v2.position);
 
-                        if (edgeDist < minEdgeDist)
-                        {
+                        if (edgeDist < minEdgeDist) {
                             minEdgeDist = edgeDist;
                             merge_e1 = f1v123[v];
                             merge_e2 = f1v231[v];
                             merge_f1v3 = f1v312[v];
                         }
-                        else if (edgeDist > maxEdgeDist)
-                        {
+                        else if (edgeDist > maxEdgeDist) {
                             maxEdgeDist = edgeDist;
                             split_e1 = f1v123[v];
                             split_e2 = f1v231[v];
@@ -639,8 +581,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                 }
 
                 // need merge ? (favor merging over splitting)
-                if (minEdgeDist < minAllowedDist)
-                {
+                if (minEdgeDist < minAllowedDist) {
                     merge = true;
                     e1 = merge_e1;
                     e2 = merge_e2;
@@ -648,8 +589,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                     break;
                 }
                 // need split ?
-                else if (maxEdgeDist > maxAllowedDist)
-                {
+                else if (maxEdgeDist > maxAllowedDist) {
                     split = true;
                     e1 = split_e1;
                     e2 = split_e2;
@@ -663,34 +603,29 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                 break;
 
             // => we need the second associated face for that edge
-            for (int i = 0; i < cells.size(); i++)
-            {
+            for (int i = 0; i < cells.size(); i++) {
                 f2 = getCell(i);
 
                 if (f2 == f1)
                     continue;
 
                 // check if f2 contains [v1-v2]
-                if ((e1 == f2.vertexIndices[0]) && (e2 == f2.vertexIndices[2]))
-                {
+                if ((e1 == f2.vertexIndices[0]) && (e2 == f2.vertexIndices[2])) {
                     f2v3 = f2.vertexIndices[1];
                     break;
                 }
-                else if ((e1 == f2.vertexIndices[1]) && (e2 == f2.vertexIndices[0]))
-                {
+                else if ((e1 == f2.vertexIndices[1]) && (e2 == f2.vertexIndices[0])) {
                     f2v3 = f2.vertexIndices[2];
                     break;
                 }
-                else if ((e1 == f2.vertexIndices[2]) && (e2 == f2.vertexIndices[1]))
-                {
+                else if ((e1 == f2.vertexIndices[2]) && (e2 == f2.vertexIndices[1])) {
                     f2v3 = f2.vertexIndices[0];
                     break;
                 }
             }
 
             // CASE 0: THE MESH IS INCONSISTENT
-            if (f2v3 == -1)
-            {
+            if (f2v3 == -1) {
                 // should never happen:
                 // if f2v3 does not exist, then [v1-v2] only belongs to a single face (f1)
                 // => this means the mesh is inconsistent (not closed)
@@ -698,15 +633,15 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                 System.err.println("[MESH RESAMPLING ERROR] Problematic edge: " + e1 + "-" + e2 + ":");
                 System.err.print(" Vertex " + f1v123[0] + " has neighbors: ");
                 for (final Integer nn : getVertex(f1v123[0]).neighbors)
-                    System.err.print(nn.intValue() + "  ");
+                    System.err.print(nn + "  ");
                 System.err.println();
                 System.err.print(" Vertex " + f1v123[1] + " has neighbors: ");
                 for (final Integer nn : getVertex(f1v123[1]).neighbors)
-                    System.err.print(nn.intValue() + "  ");
+                    System.err.print(nn + "  ");
                 System.err.println();
                 System.err.print(" Vertex " + f1v123[2] + " has neighbors: ");
                 for (final Integer nn : getVertex(f1v123[2]).neighbors)
-                    System.err.print(nn.intValue() + "  ");
+                    System.err.print(nn + "  ");
                 System.err.println();
 
                 System.err.println("The mesh will be removed from further computations");
@@ -718,37 +653,29 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
 
             // we're about to change the mesh structure
             // => lock everything to prevent nasty bugs
-            synchronized (cells)
-            {
-                synchronized (vertices)
-                {
+            synchronized (cells) {
+                synchronized (vertices) {
                     // CASE 1: MERGE
-                    if (merge)
-                    {
+                    if (merge) {
                         // Check first if the edge to merge is at the base of a tetrahedron
                         // if so, delete the whole tetrahedron
-                        if (vertices.get(f1v3).neighbors.size() == 3)
-                        {
+                        if (vertices.get(f1v3).neighbors.size() == 3) {
                             // deleteTetrahedron(f1v3, f1v1, f1v2);
                             deleteTetrahedron(f1v3, e1, e2);
                         }
-                        else if (vertices.get(f2v3).neighbors.size() == 3)
-                        {
+                        else if (vertices.get(f2v3).neighbors.size() == 3) {
                             // deleteTetrahedron(f2v3, f1v2, f1v1);
                             deleteTetrahedron(f2v3, e2, e1);
                         }
-                        else
-                        {
+                        else {
                             final Vertex3D v1 = vertices.get(e1);
                             final Vertex3D v2 = vertices.get(e2);
 
                             // if v1 and v2 have a 3rd common neighbor n in addition to f1v3 and f2v3,
                             // then the mesh has reached a tubular structure.
                             // => split the mesh using the virtual face [v1,v2,n]
-                            for (final int n : v1.neighbors)
-                            {
-                                if (v2.neighbors.contains(n) && (n != f1v3) && (n != f2v3))
-                                {
+                            for (final int n : v1.neighbors) {
+                                if (v2.neighbors.contains(n) && (n != f1v3) && (n != f2v3)) {
                                     // FIXME: what is splitContourAtVertices(..) actually doing ?? (Stephane)
                                     splitContourAtVertices(e1, e2, n);
                                     // don't go further
@@ -771,16 +698,14 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                             v1.position.interpolate(v2.position, 0.5);
 
                             // 3) Remove v2 from its neighborhood...
-                            for (final int n : v2.neighbors)
-                            {
+                            for (final int n : v2.neighbors) {
                                 final Vertex3D vn = vertices.get(n);
 
                                 vn.neighbors.remove(e2);
 
                                 // additionally, add v2's neighbors to v1
                                 // (except the existing ones: e1, f1v3, f2v3)
-                                if ((n != e1) && (n != f1v3) && (n != f2v3))
-                                {
+                                if ((n != e1) && (n != f1v3) && (n != f2v3)) {
                                     v1.neighbors.add(n);
                                     vn.neighbors.add(e1);
                                 }
@@ -797,8 +722,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                         }
                     }
                     // CASE 2: INVERT or SPLIT
-                    else if (split)
-                    {
+                    else if (split) {
                         // 1) remove the old faces
                         cells.remove(f1);
                         cells.remove(f2);
@@ -811,14 +735,12 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh
                         final Vertex3D v1 = vertices.get(f1v3);
                         final Vertex3D v2 = vertices.get(f2v3);
 
-                        if ((v1.distanceSqTo(v2) < maxAllowedDist) && v1.neighbors.contains(f2v3))
-                        {
+                        if ((v1.distanceSqTo(v2) < maxAllowedDist) && v1.neighbors.contains(f2v3)) {
                             // INVERT --> 3) create the two new faces
                             addCell(f1v3, e1, f2v3);
                             addCell(f2v3, e2, f1v3);
                         }
-                        else
-                        {
+                        else {
                             // SPLIT
 
                             // 3) create a vertex in the middle of the edge (it may be merged from an existing one)
