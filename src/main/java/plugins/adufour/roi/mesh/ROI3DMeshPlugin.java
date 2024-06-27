@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,14 +18,17 @@
 
 package plugins.adufour.roi.mesh;
 
-import icy.plugin.abstract_.Plugin;
-import icy.plugin.interface_.PluginLibrary;
+import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
+import org.bioimageanalysis.icy.extension.plugin.interface_.PluginLibrary;
 
 /**
  * Marks the entire package as an Icy plugin
  *
  * @author Alexandre Dufour
  */
+@IcyPluginName("3D Mesh ROI")
+@IcyPluginIcon(path = "/3d-mesh-roi.png")
 public class ROI3DMeshPlugin extends Plugin implements PluginLibrary {
-
 }

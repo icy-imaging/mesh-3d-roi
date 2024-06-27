@@ -7,13 +7,11 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>2.2.0</version>
+        <version>3.0.0-a.1</version>
     </parent>
 
     <artifactId>3d-mesh-roi</artifactId>
-    <version>2.0.0</version>
-
-    <packaging>jar</packaging>
+    <version>2.0.0-a.1</version>
 
     <name>3D Mesh ROI</name>
     <description>
@@ -23,49 +21,22 @@
     <dependencies>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-bioformats</artifactId>
+            <artifactId>kernel-extensions</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-vtk</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>quickhull</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-linux-amd64</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-linux-i586</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-macosx-universal</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-windows-amd64</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl-all-natives-windows-i586</artifactId>
+            <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>vecmath</artifactId>
         </dependency>
     </dependencies>
 
     <repositories>
         <repository>
             <id>icy</id>
-            <name>Icy's Nexus repository</name>
-            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
+            <url>https://nexus-icy.pasteur.cloud/repository/icy/</url>
         </repository>
     </repositories>
 </project>

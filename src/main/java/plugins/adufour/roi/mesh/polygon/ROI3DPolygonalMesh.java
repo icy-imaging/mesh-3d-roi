@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,15 +18,17 @@
 
 package plugins.adufour.roi.mesh.polygon;
 
-import icy.roi.BooleanMask3D;
-import icy.roi.ROI3D;
-import icy.vtk.IcyVtkPanel;
-import icy.vtk.VtkUtil;
+import org.bioimageanalysis.extension.kernel.roi.roi3d.ROI3DArea;
+import org.bioimageanalysis.icy.common.geom.point.Point3D;
+import org.bioimageanalysis.icy.gui.render.IcyVtkPanel;
+import org.bioimageanalysis.icy.model.render.vtk.VtkUtil;
+import org.bioimageanalysis.icy.model.roi.ROI;
+import org.bioimageanalysis.icy.model.roi.ROI3D;
+import org.bioimageanalysis.icy.model.roi.mask.BooleanMask3D;
 import plugins.adufour.quickhull.QuickHull3D;
 import plugins.adufour.roi.mesh.Cell3D;
 import plugins.adufour.roi.mesh.ROI3DMesh;
 import plugins.adufour.roi.mesh.Vertex3D;
-import plugins.kernel.roi.roi3d.ROI3DArea;
 import vtk.*;
 
 import javax.vecmath.Point3d;
@@ -68,7 +70,7 @@ import java.io.PrintStream;
  * information is indicated during or after creation, such that translation
  * between both coordinate spaces is made easy and transparent to the user (this
  * includes ROI-based operations and measures such as
- * {@link #contains(icy.type.point.Point3D) contains()}, {@link #getBounds()},
+ * {@link #contains(Point3D) contains()}, {@link #getBounds()},
  * {@link #getBooleanMask(boolean) getBooleanMask()}, etc.)
  * <p>
  * <p>
@@ -123,7 +125,7 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D> {
     }
 
     @Override
-    protected ROIPainter createPainter() {
+    protected ROI.ROIPainter createPainter() {
         return new PolygonalMeshPainter();
     }
 
@@ -152,22 +154,22 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D> {
         try {
             synchronized (vtkInternalLock) {
                 // lock vtkPolygons as well
-                synchronized (vtkPolygons) {
-                    final vtkPoints oldPoints = vtkPolygons.GetPoints();
-                    // set the point data
-                    vtkPolygons.SetPoints(newPoints);
-                    if (oldPoints != null)
-                        oldPoints.Delete();
+                //synchronized (vtkPolygons) {
+                final vtkPoints oldPoints = vtkPolygons.GetPoints();
+                // set the point data
+                vtkPolygons.SetPoints(newPoints);
+                if (oldPoints != null)
+                    oldPoints.Delete();
 
-                    final vtkCellArray oldCells = vtkPolygons.GetPolys();
-                    // interpret the raw index buffer as cells
-                    vtkPolygons.SetPolys(newCells);
-                    if (oldCells != null)
-                        oldCells.Delete();
+                final vtkCellArray oldCells = vtkPolygons.GetPolys();
+                // interpret the raw index buffer as cells
+                vtkPolygons.SetPolys(newCells);
+                if (oldCells != null)
+                    oldCells.Delete();
 
-                    // notify changes
-                    vtkPolygons.Modified();
-                }
+                // notify changes
+                vtkPolygons.Modified();
+                //}
             }
         }
         finally {
@@ -988,11 +990,11 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D> {
     @Override
     protected void addVtkCell(final vtkCell cell) {
         final vtkIdList ids = cell.GetPointIds();
-        final int nId = ids.GetNumberOfIds();
+        final int nId = (int) ids.GetNumberOfIds();
         final int[] vertexIndices = new int[nId];
 
         for (int id = 0; id < nId; id++)
-            vertexIndices[id] = ids.GetId(id);
+            vertexIndices[id] = (int) ids.GetId(id);
 
         addCell(createCell(vertexIndices));
     }

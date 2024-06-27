@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,15 +18,17 @@
 
 package plugins.adufour.roi.mesh;
 
-import icy.file.FileUtil;
-import icy.gui.frame.progress.FileFrame;
-import icy.gui.viewer.Viewer;
-import icy.image.IcyBufferedImage;
-import icy.plugin.abstract_.PluginFileImporter;
-import icy.sequence.Sequence;
-import icy.system.thread.ThreadUtil;
-import icy.type.DataType;
-import icy.type.rectangle.Rectangle3D;
+import org.bioimageanalysis.icy.common.geom.rectangle.Rectangle3D;
+import org.bioimageanalysis.icy.common.type.DataType;
+import org.bioimageanalysis.icy.extension.plugin.abstract_.PluginFileImporter;
+import org.bioimageanalysis.icy.gui.frame.progress.FileFrame;
+import org.bioimageanalysis.icy.gui.viewer.Viewer;
+import org.bioimageanalysis.icy.io.FileUtil;
+import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.system.thread.ThreadUtil;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import plugins.adufour.roi.mesh.polygon.ROI3DPolygonalMesh;
 import plugins.kernel.canvas.VtkCanvasPlugin;
 
@@ -44,13 +46,14 @@ public class VTKMeshImporter extends PluginFileImporter {
     @Override
     public List<FileFilter> getFileFilters() {
         final FileFilter vtkFilter = new FileFilter() {
+            @Contract(pure = true)
             @Override
-            public String getDescription() {
+            public @NotNull String getDescription() {
                 return "VTK mesh files";
             }
 
             @Override
-            public boolean accept(final File f) {
+            public boolean accept(final @NotNull File f) {
                 return f.isDirectory() || acceptFile(f.getPath());
             }
         };

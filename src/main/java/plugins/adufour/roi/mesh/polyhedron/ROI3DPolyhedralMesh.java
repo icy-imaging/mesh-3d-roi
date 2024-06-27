@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,9 +18,10 @@
 
 package plugins.adufour.roi.mesh.polyhedron;
 
-import icy.roi.BooleanMask3D;
-import icy.vtk.IcyVtkPanel;
-import icy.vtk.VtkUtil;
+import org.bioimageanalysis.icy.gui.render.IcyVtkPanel;
+import org.bioimageanalysis.icy.model.render.vtk.VtkUtil;
+import org.bioimageanalysis.icy.model.roi.mask.BooleanMask3D;
+import org.jetbrains.annotations.NotNull;
 import plugins.adufour.roi.mesh.ROI3DMesh;
 import plugins.adufour.roi.mesh.polygon.ROI3DPolygonalMesh;
 import vtk.*;
@@ -84,17 +85,12 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D> {
         if (type == CellType.POLYGON)
             throw new IllegalArgumentException("Cannot create a polygon for a polyhedral mesh");
 
-        switch (type) {
-            case PYRAMID:
-                return new Pyramid3D(vertexIndices);
-            case WEDGE:
-                return new Wedge3D(vertexIndices);
-            case TETRA:
-                return new Tetrahedron3D(vertexIndices);
-            default:
-                throw new UnsupportedOperationException(
-                        "Cannot insert a cell of type: " + type + " into a polyhedral ROI");
-        }
+        return switch (type) {
+            case PYRAMID -> new Pyramid3D(vertexIndices);
+            case WEDGE -> new Wedge3D(vertexIndices);
+            case TETRA -> new Tetrahedron3D(vertexIndices);
+            default -> throw new UnsupportedOperationException("Cannot insert a cell of type: " + type + " into a polyhedral ROI");
+        };
     }
 
     @Override
@@ -114,27 +110,27 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D> {
         try {
             synchronized (vtkInternalLock) {
                 // lock vtkGrid as well
-                synchronized (vtkGrid) {
-                    // set new points
-                    final vtkPoints oldPoints = vtkGrid.GetPoints();
-                    vtkGrid.SetPoints(newPoints);
-                    if (oldPoints != null)
-                        oldPoints.Delete();
+                //synchronized (vtkGrid) {
+                // set new points
+                final vtkPoints oldPoints = vtkGrid.GetPoints();
+                vtkGrid.SetPoints(newPoints);
+                if (oldPoints != null)
+                    oldPoints.Delete();
 
-                    // get VTK cell type
-                    int cellType = -1;
-                    if (!cells.isEmpty())
-                        cellType = cells.get(0).createVTKCell().GetCellType();
+                // get VTK cell type
+                int cellType = -1;
+                if (!cells.isEmpty())
+                    cellType = cells.getFirst().createVTKCell().GetCellType();
 
-                    // set new cells
-                    final vtkCellArray oldCells = vtkGrid.GetCells();
-                    vtkGrid.SetCells(cellType, newCells);
-                    if (oldCells != null)
-                        oldCells.Delete();
+                // set new cells
+                final vtkCellArray oldCells = vtkGrid.GetCells();
+                vtkGrid.SetCells(cellType, newCells);
+                if (oldCells != null)
+                    oldCells.Delete();
 
-                    // notify changes
-                    vtkGrid.Modified();
-                }
+                // notify changes
+                vtkGrid.Modified();
+                //}
             }
         }
         finally {
@@ -188,14 +184,14 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D> {
     }
 
     @Override
-    protected void addVtkCell(final vtkCell cell) {
+    protected void addVtkCell(final @NotNull vtkCell cell) {
         final CellType cellType = CellType.GetCellType(cell.GetCellType());
         final vtkIdList ids = cell.GetPointIds();
-        final int nId = ids.GetNumberOfIds();
+        final int nId = (int) ids.GetNumberOfIds();
         final int[] vertexIndices = new int[nId];
 
         for (int ind = 0; ind < nId; ind++)
-            vertexIndices[ind] = ids.GetId(ind);
+            vertexIndices[ind] = (int) ids.GetId(ind);
 
         addCell(createCell(cellType, vertexIndices));
     }

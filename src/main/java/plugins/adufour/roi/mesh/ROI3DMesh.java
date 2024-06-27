@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,28 +18,29 @@
 
 package plugins.adufour.roi.mesh;
 
-import icy.canvas.IcyCanvas;
-import icy.painter.VtkPainter;
-import icy.roi.BooleanMask2D;
-import icy.roi.BooleanMask3D;
-import icy.roi.ROI3D;
-import icy.roi.ROIUtil;
-import icy.sequence.Sequence;
-import icy.type.point.Point5D;
-import icy.type.rectangle.Rectangle3D;
-import icy.util.XMLUtil;
-import icy.vtk.IcyVtkPanel;
-import icy.vtk.VtkUtil;
+import org.bioimageanalysis.extension.kernel.roi.roi2d.ROI2DArea;
+import org.bioimageanalysis.extension.kernel.roi.roi3d.ROI3DArea;
+import org.bioimageanalysis.icy.common.geom.point.Point5D;
+import org.bioimageanalysis.icy.common.geom.rectangle.Rectangle3D;
+import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
+import org.bioimageanalysis.icy.gui.canvas.VtkCanvas;
+import org.bioimageanalysis.icy.gui.render.IcyVtkPanel;
+import org.bioimageanalysis.icy.io.xml.XMLUtil;
+import org.bioimageanalysis.icy.model.overlay.VtkPainter;
+import org.bioimageanalysis.icy.model.render.vtk.VtkUtil;
+import org.bioimageanalysis.icy.model.roi.ROI3D;
+import org.bioimageanalysis.icy.model.roi.ROIUtil;
+import org.bioimageanalysis.icy.model.roi.mask.BooleanMask2D;
+import org.bioimageanalysis.icy.model.roi.mask.BooleanMask3D;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.system.IcyExceptionHandler;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import plugins.adufour.roi.mesh.polygon.Polygon3D;
 import plugins.adufour.roi.mesh.polygon.ROI3DPolygonalMesh;
 import plugins.adufour.roi.mesh.polyhedron.ROI3DPolyhedralMesh;
-import plugins.kernel.canvas.VtkCanvas;
-import plugins.kernel.roi.roi2d.ROI2DArea;
-import plugins.kernel.roi.roi2d.ROI2DArea.ROI2DAreaPainter;
-import plugins.kernel.roi.roi3d.ROI3DArea;
 import vtk.*;
 
 import javax.vecmath.*;
@@ -87,7 +88,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
     // single lock for VTK access
     protected final static Object vtkInternalLock = new Object();
 
-    public static Point3d vecMul(final Point3d source, final Tuple3d scale, final Point3d dest) {
+    public static @NotNull Point3d vecMul(final Point3d source, final Tuple3d scale, final Point3d dest) {
         final Point3d result = (dest == null) ? new Point3d() : dest;
 
         if (scale == null)
@@ -419,7 +420,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
         }
 
         @Override
-        public void setColor(final Color color) {
+        public void setColor(final @NotNull Color color) {
             outlineActor.GetProperty().SetColor(color.getRed() / 255., color.getGreen() / 255., color.getBlue() / 255.);
             mainActor.GetProperty().SetColor(color.getRed() / 255., color.getGreen() / 255., color.getBlue() / 255.);
 
@@ -465,15 +466,14 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
         }
 
         @Override
-        public void mouseClick(final MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
+        public void mouseClick(final @NotNull MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas canvas) {
             if (e.isConsumed())
                 return;
             // not active here
             if (!isActiveFor(canvas))
                 return;
 
-            if (canvas instanceof VtkCanvas) {
-                final VtkCanvas vtk = (VtkCanvas) canvas;
+            if (canvas instanceof final VtkCanvas vtk) {
                 // pick
                 final vtkProp prop = vtk.pickProp(e.getX(), e.getY());
 
@@ -488,10 +488,8 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
         public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
             super.paint(g, sequence, canvas);
 
-            if (canvas instanceof VtkCanvas) {
-                // 3D canvas
-                final VtkCanvas cnv = (VtkCanvas) canvas;
-
+            // 3D canvas
+            if (canvas instanceof final VtkCanvas cnv) {
                 // update reference if needed
                 if (canvas3d.get() != cnv)
                     canvas3d = new WeakReference<>(cnv);
@@ -569,7 +567,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
                         final ROI2DArea slice = getROIMask().getSlice(posZ);
 
                         if (slice != null) {
-                            final ROI2DAreaPainter maskPainter = slice.getOverlay();
+                            final ROI2DArea.ROI2DAreaPainter maskPainter = slice.getOverlay();
 
                             maskPainter.setColor(getColor());
                             maskPainter.paint(g, sequence, canvas);
@@ -824,14 +822,14 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
             node.appendChild(vtk);
         }
         catch (final IOException e) {
-            e.printStackTrace();
+            IcyExceptionHandler.showErrorMessage(e, true);
             return false;
         }
 
         return true;
     }
 
-    public boolean saveToVTK(final File vtkFile) {
+    public boolean saveToVTK(final @NotNull File vtkFile) {
         optimizeVertexBuffer();
 
         final vtkXMLDataSetWriter wr = new vtkXMLDataSetWriter();
@@ -883,7 +881,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
             loadFromVTK(file, useLegacyReader);
         }
         catch (final IOException e) {
-            e.printStackTrace();
+            IcyExceptionHandler.showErrorMessage(e, true);
             return false;
         }
 
@@ -928,7 +926,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
      *
      * @param vtkPointSet the VTK object to set mesh data from
      */
-    protected void loadFromVTK(final vtkPointSet vtkPointSet) {
+    protected void loadFromVTK(final @NotNull vtkPointSet vtkPointSet) {
         synchronized (vertices) {
             vertices.clear();
         }
@@ -940,7 +938,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
 
         if (vtkPoints != null) {
             // load points (generically)
-            final int nPoints = vtkPoints.GetNumberOfPoints();
+            final int nPoints = (int) vtkPoints.GetNumberOfPoints();
             for (int i = 0; i < nPoints; i++) {
                 final double[] xyz = vtkPoints.GetPoint(i);
                 final Point3d position = new Point3d(xyz);
@@ -950,7 +948,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
         }
 
         // load cells (generically)
-        final int nCells = vtkPointSet.GetNumberOfCells();
+        final int nCells = (int) vtkPointSet.GetNumberOfCells();
         for (int c = 0; c < nCells; c++)
             addVtkCell(vtkPointSet.GetCell(c));
 
@@ -992,7 +990,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
             return clone;
         }
         catch (final Exception e) {
-            e.printStackTrace();
+            IcyExceptionHandler.showErrorMessage(e, true);
             throw new RuntimeException(e);
         }
     }
@@ -1450,7 +1448,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
      * Calculates Returns a 3D cuboid representing the contour's bounding box. The bounding box is
      * defined as the smallest cuboid that entirely contains the contour.
      *
-     * @return a {@link icy.type.rectangle.Rectangle3D.Double} object containing the bounding box of
+     * @return a {@link Rectangle3D.Double} object containing the bounding box of
      * this mesh, expressed in voxel (image) space
      */
     @Override
@@ -1585,7 +1583,7 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
      *
      * @param vector the translation vector
      */
-    public void translate(final Vector3d vector) {
+    public void translate(final @NotNull Vector3d vector) {
         if (vector.lengthSquared() == 0.0)
             return;
 
@@ -1633,27 +1631,6 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
     @Override
     public boolean intersects(final double x, final double y, final double z, final double sizeX, final double sizeY, final double sizeZ) {
         return getROIMask().intersects(x, y, z, sizeX, sizeY, sizeZ);
-
-        // FIXME: What ?? i guess this don't really work... (Stephane)
-        // the specified box intersects if any of its corners do
-        // if (contains(x, y, z))
-        // return true;
-        // if (contains(x + sizeX, y, z))
-        // return true;
-        // if (contains(x, y + sizeY, z))
-        // return true;
-        // if (contains(x, y, z + sizeZ))
-        // return true;
-        // if (contains(x + sizeX, y + sizeY, z))
-        // return true;
-        // if (contains(x + sizeX, y, z + sizeZ))
-        // return true;
-        // if (contains(x, y + sizeY, z + sizeZ))
-        // return true;
-        // if (contains(x + sizeX, y + sizeY, z + sizeZ))
-        // return true;
-        //
-        // return false;
     }
 
     /**

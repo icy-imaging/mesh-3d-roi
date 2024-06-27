@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 
 package plugins.adufour.roi.mesh;
 
+import org.jetbrains.annotations.NotNull;
 import plugins.adufour.roi.mesh.polygon.Polygon3D;
 import plugins.adufour.roi.mesh.polyhedron.Polyhedron3D;
 
@@ -43,7 +44,7 @@ public abstract class Cell3D {
     /**
      * Creates a new mesh cell from the specified vertex indices
      */
-    protected Cell3D(final int... vertexIndices) {
+    protected Cell3D(final int @NotNull ... vertexIndices) {
         this.vertexIndices = new int[vertexIndices.length];
         System.arraycopy(vertexIndices, 0, this.vertexIndices, 0, vertexIndices.length);
         size = vertexIndices.length;
@@ -100,7 +101,7 @@ public abstract class Cell3D {
      *
      * @throws IllegalArgumentException if the size of the specified list is different from the size of this cell
      */
-    public void setIndices(final int... vertexIndices) throws IllegalArgumentException {
+    public void setIndices(final int @NotNull ... vertexIndices) throws IllegalArgumentException {
         if (vertexIndices.length != size)
             throw new IllegalArgumentException("Invalid cell size: " + vertexIndices.length);
 

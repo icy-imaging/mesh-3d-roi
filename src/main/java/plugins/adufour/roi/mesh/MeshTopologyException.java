@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 
 package plugins.adufour.roi.mesh;
 
+import org.jetbrains.annotations.NotNull;
 import plugins.adufour.roi.mesh.polygon.ROI3DTriangularMesh;
 
 /**
@@ -30,8 +31,6 @@ import plugins.adufour.roi.mesh.polygon.ROI3DTriangularMesh;
  * @see ROI3DTriangularMesh#resample(double, double)
  */
 public class MeshTopologyException extends Exception {
-    private static final long serialVersionUID = 1L;
-
     public final ROI3DMesh<?> source;
 
     public final ROI3DMesh<?>[] children;
@@ -44,7 +43,7 @@ public class MeshTopologyException extends Exception {
      *                 the exception (typically when a mesh vanishes or splits as a result of a
      *                 resampling operation)
      */
-    public <C extends Cell3D> MeshTopologyException(final ROI3DMesh<C> contour, final ROI3DMesh<C>[] children) {
+    public <C extends Cell3D> MeshTopologyException(final @NotNull ROI3DMesh<C> contour, final ROI3DMesh<C>[] children) {
         super("Topology break detected in contour " + contour.hashCode());
         this.source = contour;
         this.children = children;

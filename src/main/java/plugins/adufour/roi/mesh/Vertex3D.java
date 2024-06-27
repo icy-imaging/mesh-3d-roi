@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,6 +18,8 @@
 
 package plugins.adufour.roi.mesh;
 
+import org.jetbrains.annotations.NotNull;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.util.HashSet;
@@ -35,7 +37,7 @@ public class Vertex3D {
     public final Vector3d normal = new Vector3d();
     public final Set<Integer> neighbors;
 
-    protected Vertex3D(final Vertex3D v) {
+    protected Vertex3D(final @NotNull Vertex3D v) {
         this(v.position, v.neighbors);
     }
 
@@ -53,7 +55,7 @@ public class Vertex3D {
         this.neighbors = new HashSet<>(nbNeighbors);
     }
 
-    public Vertex3D(final Point3d position, final Set<Integer> neighbors) {
+    public Vertex3D(final Point3d position, final @NotNull Set<Integer> neighbors) {
         this(position, neighbors.size());
 
         this.neighbors.addAll(neighbors);
@@ -64,11 +66,11 @@ public class Vertex3D {
         return new Vertex3D(this);
     }
 
-    public double distanceTo(final Vertex3D v) {
+    public double distanceTo(final @NotNull Vertex3D v) {
         return position.distance(v.position);
     }
 
-    public double distanceSqTo(final Vertex3D v) {
+    public double distanceSqTo(final @NotNull Vertex3D v) {
         return position.distanceSquared(v.position);
     }
 

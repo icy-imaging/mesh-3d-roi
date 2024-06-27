@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,9 +18,10 @@
 
 package plugins.adufour.roi.mesh.polygon;
 
-import icy.roi.ROI3D;
-import icy.type.collection.array.Array1DUtil;
-import icy.type.rectangle.Rectangle3D;
+import org.bioimageanalysis.icy.common.collection.array.Array1DUtil;
+import org.bioimageanalysis.icy.common.geom.rectangle.Rectangle3D;
+import org.bioimageanalysis.icy.model.roi.ROI3D;
+import org.jetbrains.annotations.NotNull;
 import plugins.adufour.quickhull.QuickHull3D;
 import plugins.adufour.roi.mesh.MeshTopologyException;
 import plugins.adufour.roi.mesh.Vertex3D;
@@ -66,9 +67,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh {
      * @param roi      the region of interest around which the mesh should be created
      */
     public ROI3DTriangularMesh(final double sampling, final ROI3D roi) {
-        if (roi instanceof ROI3DTriangularMesh) {
-            final ROI3DTriangularMesh roiTriangularMesh = (ROI3DTriangularMesh) roi;
-
+        if (roi instanceof final ROI3DTriangularMesh roiTriangularMesh) {
             setVertexData(roiTriangularMesh.vertices, true);
             setCellData(roiTriangularMesh.cells, true);
         }
@@ -118,7 +117,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh {
         roiChanged(true);
     }
 
-    private void setIcosahedron(final Rectangle3D bounds, final double sampling) {
+    private void setIcosahedron(final @NotNull Rectangle3D bounds, final double sampling) {
         // start from a regular icosahedron using the golden number PHI
         // distance between any vertex pair: 2
         // radius of the bounding sphere: PHI
@@ -209,7 +208,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh {
     }
 
     @Override
-    public Polygon3D createCell(final int... vertexIndices) {
+    public Polygon3D createCell(final int @NotNull ... vertexIndices) {
         if (vertexIndices.length != 3)
             throw new IllegalArgumentException("A triangle must be defined by exactly 3 vertex indices");
 
@@ -270,7 +269,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh {
         }
     }
 
-    private static void extractFaces(final List<Vertex3D> pointsList, final List<Polygon3D> oldFaces, final List<Polygon3D> newFaces) {
+    private static void extractFaces(final List<Vertex3D> pointsList, final @NotNull List<Polygon3D> oldFaces, final List<Polygon3D> newFaces) {
         for (final Polygon3D face : oldFaces) {
             for (final int i : face.vertexIndices) {
                 if (pointsList.get(i) != null) {
@@ -437,7 +436,7 @@ public class ROI3DTriangularMesh extends ROI3DPolygonalMesh {
         // }
     }
 
-    private ROI3DTriangularMesh buildMesh(final List<Vertex3D> vertices, final List<Polygon3D> faces) {
+    private @NotNull ROI3DTriangularMesh buildMesh(final List<Vertex3D> vertices, final List<Polygon3D> faces) {
         final ROI3DTriangularMesh result = new ROI3DTriangularMesh();
 
         result.setColor(getColor());
