@@ -39,7 +39,7 @@ Add this dependency block in your `pom.xml`
 ```xml
 <dependency>
     <groupId>org.bioimageanalysis.icy</groupId>
-    <artifactId>3d-mesh-roi</artifactId>
+    <artifactId>mesh-3d-roi</artifactId>
 </dependency>
 ```
 
