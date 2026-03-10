@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 
 package plugins.adufour.roi.mesh;
 
+import icy.plugins.kernel.canvas.VtkCanvasPlugin;
 import org.bioimageanalysis.icy.common.geom.rectangle.Rectangle3D;
 import org.bioimageanalysis.icy.common.type.DataType;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.PluginFileImporter;
@@ -30,7 +31,6 @@ import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import plugins.adufour.roi.mesh.polygon.ROI3DPolygonalMesh;
-import plugins.kernel.canvas.VtkCanvasPlugin;
 
 import javax.swing.filechooser.FileFilter;
 import java.io.File;

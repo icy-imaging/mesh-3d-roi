@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -120,7 +120,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D> {
                 // get VTK cell type
                 int cellType = -1;
                 if (!cells.isEmpty())
-                    cellType = cells.getFirst().createVTKCell().GetCellType();
+                    cellType = cells.get(0).createVTKCell().GetCellType();
 
                 // set new cells
                 final vtkCellArray oldCells = vtkGrid.GetCells();
