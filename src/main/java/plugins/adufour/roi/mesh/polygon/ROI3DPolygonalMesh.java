@@ -18,13 +18,13 @@
 
 package plugins.adufour.roi.mesh.polygon;
 
-import org.bioimageanalysis.extension.kernel.roi.roi3d.ROI3DArea;
-import org.bioimageanalysis.icy.common.geom.point.Point3D;
-import org.bioimageanalysis.icy.gui.render.IcyVtkPanel;
-import org.bioimageanalysis.icy.model.render.vtk.VtkUtil;
-import org.bioimageanalysis.icy.model.roi.ROI;
-import org.bioimageanalysis.icy.model.roi.ROI3D;
-import org.bioimageanalysis.icy.model.roi.mask.BooleanMask3D;
+import fr.icy.extension.kernel.roi.roi3d.ROI3DArea;
+import fr.icy.common.geom.point.Point3D;
+import fr.icy.gui.render.IcyVtkPanel;
+import fr.icy.model.render.vtk.VtkUtil;
+import fr.icy.model.roi.ROI;
+import fr.icy.model.roi.ROI3D;
+import fr.icy.model.roi.mask.BooleanMask3D;
 import plugins.adufour.quickhull.QuickHull3D;
 import plugins.adufour.roi.mesh.Cell3D;
 import plugins.adufour.roi.mesh.ROI3DMesh;

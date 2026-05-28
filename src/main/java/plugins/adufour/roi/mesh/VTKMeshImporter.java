@@ -19,15 +19,15 @@
 package plugins.adufour.roi.mesh;
 
 import icy.plugins.kernel.canvas.VtkCanvasPlugin;
-import org.bioimageanalysis.icy.common.geom.rectangle.Rectangle3D;
-import org.bioimageanalysis.icy.common.type.DataType;
-import org.bioimageanalysis.icy.extension.plugin.abstract_.PluginFileImporter;
-import org.bioimageanalysis.icy.gui.frame.progress.FileFrame;
-import org.bioimageanalysis.icy.gui.viewer.Viewer;
-import org.bioimageanalysis.icy.io.FileUtil;
-import org.bioimageanalysis.icy.model.image.IcyBufferedImage;
-import org.bioimageanalysis.icy.model.sequence.Sequence;
-import org.bioimageanalysis.icy.system.thread.ThreadUtil;
+import fr.icy.common.geom.rectangle.Rectangle3D;
+import fr.icy.common.type.DataType;
+import fr.icy.extension.plugin.abstract_.PluginFileImporter;
+import fr.icy.gui.frame.progress.FileFrame;
+import fr.icy.gui.viewer.Viewer;
+import fr.icy.io.FileUtil;
+import fr.icy.model.image.IcyBufferedImage;
+import fr.icy.model.sequence.Sequence;
+import fr.icy.system.thread.ThreadUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import plugins.adufour.roi.mesh.polygon.ROI3DPolygonalMesh;

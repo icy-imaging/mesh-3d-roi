@@ -18,9 +18,9 @@
 
 package plugins.adufour.roi.mesh.polyhedron;
 
-import org.bioimageanalysis.icy.gui.render.IcyVtkPanel;
-import org.bioimageanalysis.icy.model.render.vtk.VtkUtil;
-import org.bioimageanalysis.icy.model.roi.mask.BooleanMask3D;
+import fr.icy.gui.render.IcyVtkPanel;
+import fr.icy.model.render.vtk.VtkUtil;
+import fr.icy.model.roi.mask.BooleanMask3D;
 import org.jetbrains.annotations.NotNull;
 import plugins.adufour.roi.mesh.ROI3DMesh;
 import plugins.adufour.roi.mesh.polygon.ROI3DPolygonalMesh;

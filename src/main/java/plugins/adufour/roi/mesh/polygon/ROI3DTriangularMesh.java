@@ -18,9 +18,9 @@
 
 package plugins.adufour.roi.mesh.polygon;
 
-import org.bioimageanalysis.icy.common.collection.array.Array1DUtil;
-import org.bioimageanalysis.icy.common.geom.rectangle.Rectangle3D;
-import org.bioimageanalysis.icy.model.roi.ROI3D;
+import fr.icy.common.collection.array.Array1DUtil;
+import fr.icy.common.geom.rectangle.Rectangle3D;
+import fr.icy.model.roi.ROI3D;
 import org.jetbrains.annotations.NotNull;
 import plugins.adufour.quickhull.QuickHull3D;
 import plugins.adufour.roi.mesh.MeshTopologyException;
