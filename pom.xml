@@ -7,16 +7,16 @@
     <parent>
         <groupId>fr.icy</groupId>
         <artifactId>pom-icy</artifactId>
-        <version>3.0.0-a.7</version>
+        <version>3.0.0-a.8-SNAPSHOT</version>
     </parent>
 
-    <groupId>fr.icy.extensions</groupId>
+    <groupId>fr.icy.extension</groupId>
     <artifactId>mesh-3d-roi</artifactId>
-    <version>2.0.0-a.7</version>
+    <version>2.0.0-a.8-SNAPSHOT</version>
 
     <name>3D Mesh ROI</name>
     <description>SDK for 3D ROI creation and manipulation using polygonal (surface) and polyhedral (volume) meshes</description>
-    <url>https://icy.bioimageanalysis.org/</url>
+    <url>http://icy.fr/</url>
     <inceptionYear>2014</inceptionYear>
 
     <scm>
@@ -59,12 +59,13 @@
     <contributors>
         <contributor>
             <name>Alexandre Dufour</name>
-            <roles>
-                <role>founder</role>
-            </roles>
         </contributor>
         <contributor>
             <name>Stéphane Dallongeville</name>
+        </contributor>
+        <contributor>
+            <name>Thomas Musset</name>
+            <properties><id>Azargas</id></properties>
         </contributor>
     </contributors>
 
@@ -82,14 +83,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>fr.icy.extensions</groupId>
+            <groupId>fr.icy.extension</groupId>
             <artifactId>kernel</artifactId>
-            <version>${fr.icy.extensions.kernel.version}</version>
+            <version>${fr.icy.extension.kernel.version}</version>
         </dependency>
         <dependency>
-            <groupId>fr.icy.extensions</groupId>
+            <groupId>fr.icy.extension</groupId>
             <artifactId>quickhull</artifactId>
-            <version>2.0.0-a.7</version>
+            <version>${fr.icy.extension.quickhull.version}</version>
         </dependency>
 
         <dependency>

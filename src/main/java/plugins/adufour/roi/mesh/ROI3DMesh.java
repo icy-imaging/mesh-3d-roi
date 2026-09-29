@@ -54,6 +54,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Generic class defining a 3D region of interest using a discrete 3D geometry
@@ -85,6 +87,8 @@ import java.util.List;
  * @author Alexandre Dufour
  */
 public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
+    private static final Logger LOGGER = Logger.getLogger(ROI3DMesh.class.getName());
+
     // single lock for VTK access
     protected final static Object vtkInternalLock = new Object();
 
@@ -822,7 +826,8 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
             node.appendChild(vtk);
         }
         catch (final IOException e) {
-            IcyExceptionHandler.showErrorMessage(e, true);
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Failed to save mesh to VTK file.", e);
             return false;
         }
 
@@ -881,7 +886,8 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
             loadFromVTK(file, useLegacyReader);
         }
         catch (final IOException e) {
-            IcyExceptionHandler.showErrorMessage(e, true);
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Failed to load mesh.", e);
             return false;
         }
 
@@ -990,7 +996,8 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
             return clone;
         }
         catch (final Exception e) {
-            IcyExceptionHandler.showErrorMessage(e, true);
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Failed to clone mesh.", e);
             throw new RuntimeException(e);
         }
     }
@@ -1289,7 +1296,8 @@ public abstract class ROI3DMesh<C extends Cell3D> extends ROI3D {
                     for (final int i : cell.vertexIndices) {
                         if (vertices.get(i) == null) {
                             success = false;
-                            System.err.println("missing vertex : " + i);
+                            if (LOGGER.isLoggable(Level.WARNING))
+                                LOGGER.log(Level.WARNING, "Missing vertex at index " + i);
                         }
                     }
                 }

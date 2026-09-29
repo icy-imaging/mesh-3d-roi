@@ -1,19 +1,17 @@
-![Version 2.0.0 alpha 7](https://img.shields.io/badge/v2.0.0-alpha_7-royalblue)
+![Version 2.0.0 alpha 8](https://img.shields.io/badge/v2.0.0-alpha_8-royalblue)
 ![Java 17+](https://img.shields.io/badge/OpenJDK-17+-5382A1?labelColor=E76F00)
 [![License: LGPL v3](https://img.shields.io/badge/LGPLv3-008033?logo=GPLv3&logoSize=auto)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/Icy_BioImaging)](https://x.com/Icy_BioImaging)
 [![Image.sc forum](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fforum.image.sc%2Ftag%2Ficy.json&query=%24.topic_list.tags.0.topic_count&suffix=%20topics&label=forum&color=0AA0B4)](https://forum.image.sc/tag/icy)
 
-# 3D Mesh ROI
+# Mesh 3D ROI
 
-This is the repository for the source code of *3D Mesh ROI*, an extension for the [bioimage analysis software Icy](https://icy.bioimageanalysis.org/), which was developed by members or former members of the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/). This plugin is licensed under the LGPL3 license.     
+This is the repository for the source code of *Mesh 3D ROI*, an extension for the [bioimage analysis software Icy](https://icy.bioimageanalysis.org/), which was developed by members or former members of the [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/). This plugin is licensed under the LGPL3 license.     
 Icy is developed and maintained by [Biological Image Analysis unit at Institut Pasteur](https://research.pasteur.fr/en/team/bioimage-analysis/). The [source code of Icy](https://gitlab.pasteur.fr/bia/icy/icy) is also licensed under a LGPL3 license.
 
 ## Extension description
 
 SDK for 3D ROI creation and manipulation using polygonal (surface) and polyhedral (volume) meshes.
-
-More detailed user documentation can be found on the 3D Mesh ROI documentation page on the Icy website: https://icy.bioimageanalysis.org/plugins/3d-mesh-roi/
 
 ## Installation instructions
 
@@ -38,9 +36,9 @@ More detailed user documentation can be found on the 3D Mesh ROI documentation p
 Add this dependency block in your `pom.xml`
 ```xml
 <dependency>
-    <groupId>fr.icy.extensions</groupId>
+    <groupId>fr.icy.extension</groupId>
     <artifactId>mesh-3d-roi</artifactId>
-    <version>${fr.icy.extensions.mesh-3d-roi.version}</version>
+    <version>${fr.icy.extension.mesh-3d-roi.version}</version>
 </dependency>
 ```
 
