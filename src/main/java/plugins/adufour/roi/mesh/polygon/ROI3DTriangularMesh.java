@@ -51,7 +51,7 @@ import java.util.*;
  */
 public class ROI3DTriangularMesh extends ROI3DPolygonalMesh {
     /**
-     * <h1>DO NOT USE! This constructor is for XML loading purposes only</h1>
+     * <b>DO NOT USE! This constructor is for XML loading purposes only</b>
      */
     public ROI3DTriangularMesh() {
         //

@@ -30,12 +30,11 @@ import javax.vecmath.Tuple3d;
 import java.io.File;
 
 /**
- * <h2>WARNING: Polyhedral meshes are still under development, do *not* use for
- * production work!</h2>
+ * <b>WARNING: Polyhedral meshes are still under development, do *not* use for
+ * production work!</b>
  * <p>
  * 3D <u>r</u>egion <u>o</u>f <u>i</u>nterest (ROI) defined as a polyhedral mesh
  * (i.e. a connected set of 3D polyhedrons defining the interior of the ROI).
- * <p>
  * <p>
  * This data structure is the dual of {@link ROI3DPolygonalMesh polygon meshes}
  * which only defines the contour of the 3D ROI.
@@ -51,7 +50,7 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D> {
     }
 
     /**
-     * <h1>DO NOT USE! This constructor is for XML loading purposes only</h1>
+     * <b>DO NOT USE! This constructor is for XML loading purposes only</b>
      */
     public ROI3DPolyhedralMesh() {
         // throw new IcyHandledException("3D Polyhedron ROI are under development");
@@ -73,7 +72,8 @@ public class ROI3DPolyhedralMesh extends ROI3DMesh<Polyhedron3D> {
 
     /**
      * {@inheritDoc}
-     * <h3>Currently supported cell types:</h3>
+     * <p>
+     * Currently supported cell types:
      * <ul>
      * <li>{@link Tetrahedron3D}</li>
      * <li>{@link Wedge3D}</li>

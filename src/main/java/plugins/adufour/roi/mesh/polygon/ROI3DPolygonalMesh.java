@@ -43,7 +43,7 @@ import java.io.PrintStream;
  * (i.e., a closed set of 2D polygons in 3D space defining the contour of the
  * ROI).
  * <p>
- * <h2>Structure</h2> A polygonal mesh is defined by two data structures:
+ * <b>Structure</b> A polygonal mesh is defined by two data structures:
  * <ul>
  * <li>A list of vertices (also known as the <b>vertex buffer</b>), defining the
  * 3D coordinates of each point of the mesh surface. Vertices are stored here in
@@ -58,12 +58,12 @@ import java.io.PrintStream;
  * allowing developers to easily extend the polygon structure as needed by
  * overriding the {@link #createCell(int...)} method</li>
  * </ul>
- * <h2>Visualization</h2> Polygonal meshes carry an integrated painter that will
+ * <b>Visualization</b> Polygonal meshes carry an integrated painter that will
  * automatically display them on almost any available sequence viewer. In a 3D
  * viewer, display is performed using the VTK library. In 2D viewers, the
  * current slice of the mesh is represented as a filled area.
  * <p>
- * <h2>Important note</h2> Contrary to 3D ROI backed by the pixel grid (such as
+ * <b>Important note</b> Contrary to 3D ROI backed by the pixel grid (such as
  * {@link ROI3DArea}), polygon mesh ROI are defined in metric space to optimize
  * the calculation of geometric measures (e.g. volume, surface area, normals,
  * curvature, distances, etc.). It is therefore essential that pixel size
@@ -72,8 +72,6 @@ import java.io.PrintStream;
  * includes ROI-based operations and measures such as
  * {@link #contains(Point3D) contains()}, {@link #getBounds()},
  * {@link #getBooleanMask(boolean) getBooleanMask()}, etc.)
- * <p>
- * <p>
  *
  * @author Alexandre Dufour
  * @see <a href="http://en.wikipedia.org/wiki/Polygon_mesh">Polygon mesh
@@ -101,7 +99,7 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D> {
     // private boolean surfVolPxUpToDate = false;
 
     /**
-     * <h1>DO NOT USE! This constructor is for XML loading purposes only</h1>
+     * <b>DO NOT USE! This constructor is for XML loading purposes only</b>
      */
     public ROI3DPolygonalMesh() {
         //
@@ -321,9 +319,9 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D> {
      *                   meshCenter should be in metric unit too.
      *                   Set it to <code>null</code> if not needed.
      * @return <ul>
-     * <li>if <code>p</code> is outside: <code>0</code>
+     * <li>if <code>p</code> is outside: <code>0</code></li>
      * <li>if <code>p</code> is inside: the distance from <code>p</code>
-     * to the contour edge
+     * to the contour edge</li>
      * </ul>
      */
     public double getPenetrationDepth(final Point3d point, final Point3d meshCenter, final Tuple3d scale) {
@@ -414,9 +412,9 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D> {
      *              in metric unit too.
      *              Set it to <code>null</code> if not needed.
      * @return <ul>
-     * <li>if <code>p</code> is outside: <code>0</code>
+     * <li>if <code>p</code> is outside: <code>0</code></li>
      * <li>if <code>p</code> is inside: the distance from <code>p</code>
-     * to the contour edge
+     * to the contour edge</li>
      * </ul>
      */
     public double getPenetrationDepth(final Point3d point, final Tuple3d scale) {
@@ -429,9 +427,9 @@ public class ROI3DPolygonalMesh extends ROI3DMesh<Polygon3D> {
      *
      * @param point a point to test
      * @return <ul>
-     * <li>if <code>p</code> is outside: <code>0</code>
+     * <li>if <code>p</code> is outside: <code>0</code></li>
      * <li>if <code>p</code> is inside: the distance from <code>p</code>
-     * to the contour edge
+     * to the contour edge</li>
      * </ul>
      */
     public double getPenetrationDepth(final Point3d point) {
